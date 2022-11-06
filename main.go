@@ -16,7 +16,7 @@ func main() {
 	for i := 0; i < 2; i++ {
 		t := strings.Split(CLInput(), " ")
 		ts = append(ts, Team{
-			// find a better funciton than .Title
+			// find a better function than .Title
 			name: strings.Title(strings.Join(t[1:], " ")),
 			year: t[0],
 		})
@@ -31,13 +31,12 @@ func main() {
 			defer wg.Done()
 			yearLink := scrape.FindYrBB(yr)
 			teamLink := scrape.FindTeamBB(yearLink, tm)
-			ps := scrape.FindPlayers(teamLink)
+			ps := scrape.FindHitters(teamLink)
 			results = append(results, ps)
 		}(&wg, team.name, team.year)
 	}
 	wg.Wait()
-
-	fmt.Println(results[0][0])
+	fmt.Println(results[0][10])
 }
 
 type Team struct {

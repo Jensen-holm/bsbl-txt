@@ -1,12 +1,14 @@
 package scrape
 
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
 	"strings"
 )
 
+// HandleGetRequest -> we want to add headers in the future
 func HandleGetRequest(url string, r *http.Response, err error) {
 	if err != nil {
 		log.Fatalf("error requesting '%s': %v", url, err)
@@ -68,7 +70,7 @@ type Player struct {
 	data map[string]string
 }
 
-func FindPlayers(teamHref string) []Player {
+func FindHitters(teamHref string) []Player {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamHref, r, err)
 
@@ -78,23 +80,29 @@ func FindPlayers(teamHref string) []Player {
 		panic(err)
 	}
 
-	tables := doc.Find("table")
+	// do the pitching one later
+	batTbl := doc.Find("table#team_batting")
 	players := make([]Player, 0)
 
-	// Columns
+	// batting Columns
 	cols := make([]string, 0)
-	tables.Each(func(i int, tbl *goquery.Selection) {
+	batTbl.Each(func(i int, tbl *goquery.Selection) {
 		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
 			thead.Find("tr").Each(func(k int, r *goquery.Selection) {
 				r.Find("th").Each(func(l int, th *goquery.Selection) {
-					cols = append(cols, th.Text())
+					if th.Text() != "Rk" {
+						// excluding Rk because it is not found when searching through td tags
+						cols = append(cols, th.Text())
+					}
 				})
 			})
 		})
 		// data
-		tables.Each(func(i int, tbl *goquery.Selection) {
+		fmt.Println(cols)
+		batTbl.Each(func(i int, tbl *goquery.Selection) {
 			tbl.Find("tbody").Find("tr").Each(func(j int, r *goquery.Selection) {
 				p := make(map[string]string, 0)
+				fmt.Println(r.Text())
 				r.Find("td").Each(func(k int, td *goquery.Selection) {
 					if k < len(cols) {
 						p[cols[k]] = td.Text()
