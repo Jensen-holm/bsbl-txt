@@ -6,6 +6,7 @@ import (
 	"github.com/Jensen-holm/SportSimulation/scrape"
 	"os"
 	"strings"
+	"sync"
 )
 
 func CLInput() string {
@@ -35,17 +36,18 @@ func main() {
 		})
 	}
 
-	table := scrape.FindTeamBB(" ", " ")
-	fmt.Println(table)
-
 	r := make(chan string)
 
-	for _, t := range ts {
-		go func() {
-			resp := scrape.FindTeamBB(t.name, t.year)
-			fmt.Println(&resp)
-			r <- resp
-		}()
+	var wg = sync.WaitGroup{}
+
+	for _, team := range ts {
+		wg.Add(1)
+		go func(wg *sync.WaitGroup, team string, year string) {
+			table := scrape.FindTeamBB(wg, team, year)
+			r <- table
+		}(&wg, team.name, team.year)
 	}
 
+	wg.Wait()
+	fmt.Println(r)
 }
