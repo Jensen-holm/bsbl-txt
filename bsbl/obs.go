@@ -31,10 +31,18 @@ func (tm *Team) SetPitchers(pitchers []*Player) {
 	tm.pitchers = pitchers
 }
 
-func (tm *Team) GetYear() string {
+func (tm *Team) Year() string {
 	return tm.year
 }
 
-func (tm *Team) GetName() string {
+func (tm *Team) Name() string {
 	return tm.name
+}
+
+func (tm *Team) Hitters() []*Player {
+	return tm.hitters
+}
+
+func (tm *Team) Pitchers() []*Player {
+	return tm.pitchers
 }

@@ -27,15 +27,17 @@ func main() {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, tm *Team) {
 			defer wg.Done()
-			yearLink := scrape.FindYrBB(tm.GetYear())
-			teamLink := scrape.FindTeamBB(yearLink, tm.GetName())
-			hs, ps := scrape.FindPlayers(tm.GetName(), teamLink)
-			team.SetPitchers(ps) // not sure what this warning is about
+			yearLink := scrape.FindYrBB(tm.Year())
+			teamLink := scrape.FindTeamBB(yearLink, tm.Name())
+			hs, ps := scrape.FindPlayers(tm.Name(), teamLink)
+			team.SetPitchers(ps)
 			team.SetHitters(hs)
 		}(&wg, team)
 	}
+
 	wg.Wait()
-	fmt.Println(ts)
+
+	fmt.Println(ts[0])
 }
 
 func CLInput() string {
