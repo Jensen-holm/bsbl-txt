@@ -12,7 +12,7 @@ func HandleGetRequest(url string, r *http.Response, err error) {
 		panic(err)
 	}
 	if r.StatusCode != 200 {
-		log.Fatalf("odd response status code: %v", r.StatusCode)
+		log.Fatalf("odd response status code: %v\n Url: %s", r.StatusCode, url)
 	}
 }
 
@@ -41,11 +41,26 @@ func FindYrBB(year string) string {
 	return yrHref
 }
 
-// we could probably make a get document function to split up the code more
 func FindTeamBB(yearHref string, team string) string {
 	r, err := http.Get(yearHref)
 	HandleGetRequest(yearHref, r, err)
 
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	var teamHref string
+	table := doc.Find("tbody")
+	table.Find("th").Each(func(i int, s1 *goquery.Selection) {
+		txt := s1.Find("a").Text()
+		if txt == team {
+			href, ok := s1.Find("a").Attr("href")
+			if ok {
+				teamHref = bbrefPrefix + href
+			}
+		}
+	})
+	return teamHref
 }

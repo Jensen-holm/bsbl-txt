@@ -16,7 +16,7 @@ func CLInput() string {
 	if err != nil {
 		return ""
 	}
-	return input[:len(input)-1]
+	return strings.Replace(input, "\n", "", 1)
 }
 
 type Team struct {
@@ -36,19 +36,18 @@ func main() {
 		})
 	}
 
-	teamData := make([]string, 2)
-
 	var wg = sync.WaitGroup{}
-	fmt.Println(len(ts[0].year))
 
 	for _, team := range ts {
 		wg.Add(1)
-		go func(wg *sync.WaitGroup, team string, year string) {
+		go func(wg *sync.WaitGroup, tm string, yr string) {
 			defer wg.Done()
-			yearLink := scrape.FindYrBB(year)
-			teamData = append(teamData, yearLink)
+			yearLink := scrape.FindYrBB(yr)
+
+			teamLink := scrape.FindTeamBB(yearLink, tm)
+			fmt.Println(teamLink)
+
 		}(&wg, team.name, team.year)
 	}
 	wg.Wait()
-	fmt.Println(teamData)
 }
