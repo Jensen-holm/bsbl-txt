@@ -22,7 +22,7 @@ func main() {
 		})
 	}
 
-	results := make([][]map[string]string, 0)
+	results := make([][]scrape.Player, 0)
 
 	var wg = sync.WaitGroup{}
 	for _, team := range ts {
@@ -31,13 +31,13 @@ func main() {
 			defer wg.Done()
 			yearLink := scrape.FindYrBB(yr)
 			teamLink := scrape.FindTeamBB(yearLink, tm)
-			tbls := scrape.FindPlayers(teamLink)
-			results = append(results, tbls)
+			ps := scrape.FindPlayers(teamLink)
+			results = append(results, ps)
 		}(&wg, team.name, team.year)
 	}
 	wg.Wait()
 
-	fmt.Println(results)
+	fmt.Println(results[0][0])
 }
 
 type Team struct {
@@ -54,14 +54,3 @@ func CLInput() string {
 	}
 	return strings.Replace(input, "\n", "", 1)
 }
-
-//
-//func Flatten(sl [][]string) []string {
-//	f := make([]string, 0)
-//	for _, i := range sl {
-//		for _, j := range i {
-//			f = append(f, j)
-//		}
-//	}
-//	return f
-//}

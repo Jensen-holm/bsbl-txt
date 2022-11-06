@@ -64,7 +64,11 @@ func FindTeamBB(yearHref string, team string) string {
 	return teamHref
 }
 
-func FindPlayers(teamHref string) []map[string]string {
+type Player struct {
+	data map[string]string
+}
+
+func FindPlayers(teamHref string) []Player {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamHref, r, err)
 
@@ -74,9 +78,8 @@ func FindPlayers(teamHref string) []map[string]string {
 		panic(err)
 	}
 
-	tbls := make([]map[string]string, 0)
-
 	tables := doc.Find("table")
+	players := make([]Player, 0)
 
 	// Columns
 	cols := make([]string, 0)
@@ -88,17 +91,18 @@ func FindPlayers(teamHref string) []map[string]string {
 				})
 			})
 		})
-	})
-
-	// data
-	tables.Each(func(i int, tbl *goquery.Selection) {
-		tbl.Find("tbody").Find("tr").Each(func(j int, r *goquery.Selection) {
-			d := make(map[string]string, 0)
-			r.Find("td").Each(func(k int, td *goquery.Selection) {
-				d[cols[i]] = td.Text()
-				tbls = append(tbls, d)
+		// data
+		tables.Each(func(i int, tbl *goquery.Selection) {
+			tbl.Find("tbody").Find("tr").Each(func(j int, r *goquery.Selection) {
+				p := make(map[string]string, 0)
+				r.Find("td").Each(func(k int, td *goquery.Selection) {
+					if k < len(cols) {
+						p[cols[k]] = td.Text()
+					}
+				})
+				players = append(players, Player{p})
 			})
 		})
 	})
-	return tbls
+	return players
 }
