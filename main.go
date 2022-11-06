@@ -37,6 +37,7 @@ func main() {
 	}
 	wg.Wait()
 
+	fmt.Println(results)
 }
 
 type Team struct {

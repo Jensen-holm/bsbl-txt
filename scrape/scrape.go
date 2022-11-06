@@ -1,7 +1,6 @@
 package scrape
 
 import (
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
@@ -77,8 +76,11 @@ func FindPlayers(teamHref string) []map[string]string {
 
 	tbls := make([]map[string]string, 0)
 
-	doc.Find("table").Each(func(i int, tbl *goquery.Selection) {
-		cols := make([]string, 0)
+	tables := doc.Find("table")
+
+	// Columns
+	cols := make([]string, 0)
+	tables.Each(func(i int, tbl *goquery.Selection) {
 		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
 			thead.Find("tr").Each(func(k int, r *goquery.Selection) {
 				r.Find("th").Each(func(l int, th *goquery.Selection) {
@@ -86,8 +88,17 @@ func FindPlayers(teamHref string) []map[string]string {
 				})
 			})
 		})
-		fmt.Println(cols)
 	})
 
+	// data
+	tables.Each(func(i int, tbl *goquery.Selection) {
+		tbl.Find("tbody").Find("tr").Each(func(j int, r *goquery.Selection) {
+			d := make(map[string]string, 0)
+			r.Find("td").Each(func(k int, td *goquery.Selection) {
+				d[cols[i]] = td.Text()
+				tbls = append(tbls, d)
+			})
+		})
+	})
 	return tbls
 }
