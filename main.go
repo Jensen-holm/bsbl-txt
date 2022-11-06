@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	. "github.com/Jensen-holm/SportSimulation/bsbl"
-	"github.com/Jensen-holm/SportSimulation/scrape"
+	. "github.com/Jensen-holm/SportSimulation/scrape"
 	"os"
 	"strings"
 )
@@ -20,8 +20,7 @@ func main() {
 		nt.SetYear(t[0])
 		ts = append(ts, nt)
 	}
-	scrape.ScrapeTeams(ts)
-	fmt.Println(ts[0])
+	GetTeams(ts)
 }
 
 func CLInput() string {

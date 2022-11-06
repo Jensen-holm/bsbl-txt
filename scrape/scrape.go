@@ -22,7 +22,7 @@ func HandleGetRequest(str string, url string, r *http.Response, err error) {
 	}
 }
 
-var bbrefPrefix = "https://baseball-reference.com"
+var bbPrefix = "https://baseball-reference.com"
 
 func FindYrBB(year string) string {
 	var def = "https://baseball-reference.com/leagues/"
@@ -40,7 +40,7 @@ func FindYrBB(year string) string {
 		s1.Find("th").Each(func(i int, s2 *goquery.Selection) {
 			link, ok := s2.Find("a").Attr("href")
 			if ok && strings.Contains(link, year) {
-				yrHref = bbrefPrefix + link
+				yrHref = bbPrefix + link
 			}
 		})
 	})
@@ -63,7 +63,7 @@ func FindTeamBB(yearHref string, team string) string {
 		if txt == team {
 			href, ok := s1.Find("a").Attr("href")
 			if ok {
-				teamHref = bbrefPrefix + href
+				teamHref = bbPrefix + href
 			}
 		}
 	})
@@ -116,7 +116,7 @@ func ParseBBTbl(tbl *goquery.Selection) []*Player {
 	return players
 }
 
-func ScrapeTeams(teams []*Team) {
+func GetTeams(teams []*Team) {
 	data := make(map[string][]*Player)
 	var wg = sync.WaitGroup{}
 	for _, team := range teams {
@@ -142,5 +142,4 @@ func ScrapeTeams(teams []*Team) {
 			}
 		}
 	}
-
 }
