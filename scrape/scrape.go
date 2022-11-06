@@ -1,36 +1,41 @@
 package scrape
 
-// could probably change this to bbref, and separate this one and savant
-
 import (
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func HandleGetRequest(url string, r *http.Response, err error) {
 	if err != nil {
-		panic(err)
+		log.Fatalf("error requesting '%s': %v", url, err)
 	}
 	if r.StatusCode != 200 {
 		log.Fatalf("odd response status code: %v\n Url: %s", r.StatusCode, url)
 	}
 }
 
+func ResponseToTable(r *http.Response) *goquery.Selection {
+	doc, err := goquery.NewDocumentFromReader(r.Body)
+	if err != nil {
+		log.Fatalf("error creating new goquery document: %v", err)
+	}
+	return doc.Find("tbody")
+}
+
 var bbrefPrefix = "https://baseball-reference.com"
 
 func FindYrBB(year string) string {
 	var def = "https://baseball-reference.com/leagues/"
+	time.Sleep(1)
 	r, err := http.Get(def)
 	HandleGetRequest(def, r, err)
 
 	defer r.Body.Close()
-	doc, err := goquery.NewDocumentFromReader(r.Body)
-	if err != nil {
-		panic(err)
-	}
+	doc := ResponseToTable(r)
+
 	var yrHref string
 	table := doc.Find("tbody")
 	table.Find("tr").Each(func(i int, s1 *goquery.Selection) {
@@ -49,10 +54,7 @@ func FindTeamBB(yearHref string, team string) string {
 	HandleGetRequest(yearHref, r, err)
 
 	defer r.Body.Close()
-	doc, err := goquery.NewDocumentFromReader(r.Body)
-	if err != nil {
-		panic(err)
-	}
+	doc := ResponseToTable(r)
 
 	var teamHref string
 	table := doc.Find("tbody")
@@ -68,7 +70,7 @@ func FindTeamBB(yearHref string, team string) string {
 	return teamHref
 }
 
-func FindPlayers(teamHref string) []string {
+func FindPlayers(teamHref string) []map[string]string {
 
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamHref, r, err)
@@ -79,15 +81,20 @@ func FindPlayers(teamHref string) []string {
 		panic(err)
 	}
 
-	table := doc.Find("tbody")
+	tbls := make([]map[string]string, 0)
 
-	table.Find("td").Each(func(i int, s1 *goquery.Selection) {
+	doc.Find("tbody").Each(func(i int, tbl *goquery.Selection) {
 
-		fmt.Println(s1.Text())
+		cols := make([]string, 0)
+		tbl.Find("thead").Find("th").Each(func(j int, col *goquery.Selection) {
+			cols = append(cols, col.Text())
+		})
 
+		dm := make(map[string]string)
+		tbl.Find("td").Each(func(k int, td *goquery.Selection) {
+			dm[cols[k]] = td.Text()
+		})
+		tbls[i] = dm
 	})
-
-	s := make([]string, 0)
-	return s
-
+	return tbls
 }

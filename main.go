@@ -16,12 +16,12 @@ func main() {
 	for i := 0; i < 2; i++ {
 		t := strings.Split(CLInput(), " ")
 		ts = append(ts, Team{
-			name: strings.Join(t[1:], " "),
+			name: strings.ToTitle(strings.Join(t[1:], " ")),
 			year: t[0],
 		})
 	}
 
-	p := make([][]string, 0)
+	results := make(chan []map[string]string)
 
 	var wg = sync.WaitGroup{}
 	for _, team := range ts {
@@ -30,18 +30,11 @@ func main() {
 			defer wg.Done()
 			yearLink := scrape.FindYrBB(yr)
 			teamLink := scrape.FindTeamBB(yearLink, tm)
-			playerLinks := scrape.FindPlayers(teamLink)
-
-			// does go automatically flatten lists ??
-			p = append(p, playerLinks)
-
+			tbls := scrape.FindPlayers(teamLink)
+			results <- tbls
 		}(&wg, team.name, team.year)
 	}
 	wg.Wait()
-
-	// flatten it
-	fp := Flatten(p)
-	fmt.Println(fp)
 
 }
 
@@ -60,12 +53,13 @@ func CLInput() string {
 	return strings.Replace(input, "\n", "", 1)
 }
 
-func Flatten(sl [][]string) []string {
-	f := make([]string, 0)
-	for _, i := range sl {
-		for _, j := range i {
-			f = append(f, j)
-		}
-	}
-	return f
-}
+//
+//func Flatten(sl [][]string) []string {
+//	f := make([]string, 0)
+//	for _, i := range sl {
+//		for _, j := range i {
+//			f = append(f, j)
+//		}
+//	}
+//	return f
+//}
