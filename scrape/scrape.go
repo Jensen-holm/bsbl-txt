@@ -1,11 +1,11 @@
 package scrape
 
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
 func HandleGetRequest(url string, r *http.Response, err error) {
@@ -17,28 +17,21 @@ func HandleGetRequest(url string, r *http.Response, err error) {
 	}
 }
 
-func ResponseToTable(r *http.Response) *goquery.Selection {
-	doc, err := goquery.NewDocumentFromReader(r.Body)
-	if err != nil {
-		log.Fatalf("error creating new goquery document: %v", err)
-	}
-	return doc.Find("tbody")
-}
-
 var bbrefPrefix = "https://baseball-reference.com"
 
 func FindYrBB(year string) string {
 	var def = "https://baseball-reference.com/leagues/"
-	time.Sleep(1)
 	r, err := http.Get(def)
 	HandleGetRequest(def, r, err)
 
 	defer r.Body.Close()
-	doc := ResponseToTable(r)
+	doc, err := goquery.NewDocumentFromReader(r.Body)
+	if err != nil {
+		panic(err)
+	}
 
 	var yrHref string
-	table := doc.Find("tbody")
-	table.Find("tr").Each(func(i int, s1 *goquery.Selection) {
+	doc.Find("tbody").Find("tr").Each(func(i int, s1 *goquery.Selection) {
 		s1.Find("th").Each(func(i int, s2 *goquery.Selection) {
 			link, ok := s2.Find("a").Attr("href")
 			if ok && strings.Contains(link, year) {
@@ -54,11 +47,13 @@ func FindTeamBB(yearHref string, team string) string {
 	HandleGetRequest(yearHref, r, err)
 
 	defer r.Body.Close()
-	doc := ResponseToTable(r)
+	doc, err := goquery.NewDocumentFromReader(r.Body)
+	if err != nil {
+		panic(err)
+	}
 
 	var teamHref string
-	table := doc.Find("tbody")
-	table.Find("th").Each(func(i int, s1 *goquery.Selection) {
+	doc.Find("tbody").Find("th").Each(func(i int, s1 *goquery.Selection) {
 		txt := s1.Find("a").Text()
 		if txt == team {
 			href, ok := s1.Find("a").Attr("href")
@@ -71,7 +66,6 @@ func FindTeamBB(yearHref string, team string) string {
 }
 
 func FindPlayers(teamHref string) []map[string]string {
-
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamHref, r, err)
 
@@ -83,18 +77,17 @@ func FindPlayers(teamHref string) []map[string]string {
 
 	tbls := make([]map[string]string, 0)
 
-	doc.Find("tbody").Each(func(i int, tbl *goquery.Selection) {
-
+	doc.Find("table").Each(func(i int, tbl *goquery.Selection) {
 		cols := make([]string, 0)
-		tbl.Find("thead").Find("th").Each(func(j int, col *goquery.Selection) {
-			cols = append(cols, col.Text())
+		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
+			thead.Find("tr").Each(func(k int, r *goquery.Selection) {
+				r.Find("th").Each(func(l int, th *goquery.Selection) {
+					cols = append(cols, th.Text())
+				})
+			})
 		})
-
-		dm := make(map[string]string)
-		tbl.Find("td").Each(func(k int, td *goquery.Selection) {
-			dm[cols[k]] = td.Text()
-		})
-		tbls[i] = dm
+		fmt.Println(cols)
 	})
+
 	return tbls
 }

@@ -16,12 +16,13 @@ func main() {
 	for i := 0; i < 2; i++ {
 		t := strings.Split(CLInput(), " ")
 		ts = append(ts, Team{
-			name: strings.ToTitle(strings.Join(t[1:], " ")),
+			// find a better funciton than .Title
+			name: strings.Title(strings.Join(t[1:], " ")),
 			year: t[0],
 		})
 	}
 
-	results := make(chan []map[string]string)
+	results := make([][]map[string]string, 0)
 
 	var wg = sync.WaitGroup{}
 	for _, team := range ts {
@@ -31,7 +32,7 @@ func main() {
 			yearLink := scrape.FindYrBB(yr)
 			teamLink := scrape.FindTeamBB(yearLink, tm)
 			tbls := scrape.FindPlayers(teamLink)
-			results <- tbls
+			results = append(results, tbls)
 		}(&wg, team.name, team.year)
 	}
 	wg.Wait()
