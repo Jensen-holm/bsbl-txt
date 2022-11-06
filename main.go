@@ -22,6 +22,8 @@ func main() {
 		ts = append(ts, nt)
 	}
 
+	data := make(map[string][]*Player)
+
 	var wg = sync.WaitGroup{}
 	for _, team := range ts {
 		wg.Add(1)
@@ -30,14 +32,15 @@ func main() {
 			yearLink := scrape.FindYrBB(tm.Year())
 			teamLink := scrape.FindTeamBB(yearLink, tm.Name())
 			hs, ps := scrape.FindPlayers(tm.Name(), teamLink)
-			team.SetPitchers(ps)
-			team.SetHitters(hs)
+			data[tm.Name()+" Hitters"] = hs
+			data[tm.Name()+" Pitchers"] = ps
 		}(&wg, team)
 	}
 
 	wg.Wait()
 
-	fmt.Println(ts[0])
+	fmt.Println(data)
+
 }
 
 func CLInput() string {
