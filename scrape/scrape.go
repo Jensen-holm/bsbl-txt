@@ -1,16 +1,15 @@
 package scrape
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
 
-func FindTeamBB(team string, year string) {
+func FindTeamBB(team string, year string) *http.Response {
 	var def = "https://baseball-reference.com/leagues/"
-	html, err := http.Get(def)
+	r, err := http.Get(def)
 	if err != nil {
 		log.Fatalf("Error Getting baseball reference url: %v", err)
 	}
-	fmt.Println(html)
+	return r
 }
