@@ -1,6 +1,9 @@
 package scrape
 
+// could probably change this to bbref, and separate this one and savant
+
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
@@ -63,4 +66,28 @@ func FindTeamBB(yearHref string, team string) string {
 		}
 	})
 	return teamHref
+}
+
+func FindPlayers(teamHref string) []string {
+
+	r, err := http.Get(teamHref)
+	HandleGetRequest(teamHref, r, err)
+
+	defer r.Body.Close()
+	doc, err := goquery.NewDocumentFromReader(r.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	table := doc.Find("tbody")
+
+	table.Find("td").Each(func(i int, s1 *goquery.Selection) {
+
+		fmt.Println(s1.Text())
+
+	})
+
+	s := make([]string, 0)
+	return s
+
 }
