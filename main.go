@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/Jensen-holm/SportSimulation/scrape"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -36,14 +35,17 @@ func main() {
 		})
 	}
 
-	r := make(chan *http.Response)
+	table := scrape.FindTeamBB(" ", " ")
+	fmt.Println(table)
+
+	r := make(chan string)
 
 	for _, t := range ts {
 		go func() {
 			resp := scrape.FindTeamBB(t.name, t.year)
+			fmt.Println(&resp)
 			r <- resp
 		}()
 	}
 
-	fmt.Println(r)
 }
