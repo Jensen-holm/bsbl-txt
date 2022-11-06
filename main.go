@@ -22,26 +22,34 @@ func main() {
 		})
 	}
 
-	results := make([][]scrape.Player, 0)
-
 	var wg = sync.WaitGroup{}
 	for _, team := range ts {
 		wg.Add(1)
-		go func(wg *sync.WaitGroup, tm string, yr string) {
+		go func(wg *sync.WaitGroup, tm Team) {
 			defer wg.Done()
-			yearLink := scrape.FindYrBB(yr)
-			teamLink := scrape.FindTeamBB(yearLink, tm)
-			ps := scrape.FindHitters(teamLink)
-			results = append(results, ps)
-		}(&wg, team.name, team.year)
+			yearLink := scrape.FindYrBB(tm.year)
+			teamLink := scrape.FindTeamBB(yearLink, tm.name)
+			hs, ps := scrape.FindPlayers(teamLink)
+			team.pitchers = ps
+			team.hitters = hs
+		}(&wg, team)
 	}
 	wg.Wait()
-	fmt.Println(results[0][10])
 }
 
 type Team struct {
-	name string
-	year string
+	name     string
+	year     string
+	hitters  []scrape.Player
+	pitchers []scrape.Player
+}
+
+func (tm *Team) SetHitters(hitters []scrape.Player) {
+	tm.hitters = hitters
+}
+
+func (tm *Team) SetPitchers(pitchers []scrape.Player) {
+	tm.pitchers = pitchers
 }
 
 func CLInput() string {

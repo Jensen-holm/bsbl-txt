@@ -1,7 +1,6 @@
 package scrape
 
 import (
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
@@ -70,7 +69,7 @@ type Player struct {
 	data map[string]string
 }
 
-func FindHitters(teamHref string) []Player {
+func FindPlayers(teamHref string) ([]Player, []Player) {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamHref, r, err)
 
@@ -80,13 +79,17 @@ func FindHitters(teamHref string) []Player {
 		panic(err)
 	}
 
-	// do the pitching one later
 	batTbl := doc.Find("table#team_batting")
-	players := make([]Player, 0)
+	pitTbl := doc.Find("table#team_pitching")
+	pitchers := ParseBBTbl(pitTbl)
+	hitters := ParseBBTbl(batTbl)
+	return pitchers, hitters
+}
 
-	// batting Columns
+func ParseBBTbl(tbl *goquery.Selection) []Player {
+	players := make([]Player, 0)
 	cols := make([]string, 0)
-	batTbl.Each(func(i int, tbl *goquery.Selection) {
+	tbl.Each(func(i int, tbl *goquery.Selection) {
 		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
 			thead.Find("tr").Each(func(k int, r *goquery.Selection) {
 				r.Find("th").Each(func(l int, th *goquery.Selection) {
@@ -97,19 +100,14 @@ func FindHitters(teamHref string) []Player {
 				})
 			})
 		})
-		// data
-		fmt.Println(cols)
-		batTbl.Each(func(i int, tbl *goquery.Selection) {
-			tbl.Find("tbody").Find("tr").Each(func(j int, r *goquery.Selection) {
-				p := make(map[string]string, 0)
-				fmt.Println(r.Text())
-				r.Find("td").Each(func(k int, td *goquery.Selection) {
-					if k < len(cols) {
-						p[cols[k]] = td.Text()
-					}
-				})
-				players = append(players, Player{p})
+		tbl.Find("tbody").Find("tr").Each(func(i int, row *goquery.Selection) {
+			p := make(map[string]string, 0)
+			row.Find("td").Each(func(j int, td *goquery.Selection) {
+				if j < len(cols) {
+					p[cols[j]] = td.Text()
+				}
 			})
+			players = append(players, Player{p})
 		})
 	})
 	return players
