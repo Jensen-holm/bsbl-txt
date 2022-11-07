@@ -3,6 +3,7 @@ package bsbl
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 // Creating some functions not specific to baseball
@@ -13,25 +14,23 @@ import (
 // Choices -> Chooses an element from a slice of strings based on weighted
 // requires that the length of the two input parameters are equal
 func Choices(arr []string, weights []float64) (string, error) {
+	rand.Seed(time.Now().UnixNano())
+
 	l := len(arr)
 	if l != len(weights) {
 		return "", fmt.Errorf("in the choices function the length of the outcome and weight slices must be equal")
 	}
 
+	rNum := float64(rand.Intn(100)) / float64(100)
 	var max int
 	for i := 0; i < l; i++ {
-
-		rNum := rand.Intn(100)
-		wt := int(100 * weights[i])
-
+		wt := weights[i]
 		if rNum <= wt {
 			return arr[i], nil
 		}
-
-		if int(weights[i]) >= max {
-			max = i
+		if weights[i] >= float64(max) {
+			max = i + 1
 		}
 	}
-
-	return arr[max], nil
+	return arr[max-1], nil
 }
