@@ -22,7 +22,7 @@ func main() {
 	}
 	GetTeams(ts)
 
-	fmt.Println(ts[1].Hitters()[3])
+	ts[0].Hitters()[0].PaProbsHit()
 
 	games := make([]*Game, 10000)
 	for i := 0; i < 16200; i++ {

@@ -15,7 +15,8 @@ import (
 )
 
 func IsLetter(s string) bool {
-	s = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "*", ""), ".", ""), "#", "")
+	// this line is pretty ghetto
+	s = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "*", ""), ".", ""), "#", ""), "-", "")
 	for _, r := range s {
 		if !unicode.IsLetter(r) {
 			return false
@@ -85,7 +86,7 @@ func FindTeamBB(yearHref string, team string) (string, error) {
 	return teamHref, nil
 }
 
-func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player, error) {
+func FindPlayers(teamName string, teamHref string) (map[string]map[string]string, map[string]map[string]string, error) {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamName, teamHref, r, err)
 
@@ -104,6 +105,7 @@ func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player, error)
 
 func ParseBBTbl(tbl *goquery.Selection) []*Player {
 	players := make([]*Player, 0)
+	ps := make(map[string]map[string]string, 0)
 	cols := make([]string, 0)
 	tbl.Each(func(i int, tbl *goquery.Selection) {
 		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
@@ -117,30 +119,52 @@ func ParseBBTbl(tbl *goquery.Selection) []*Player {
 			})
 		})
 		tbl.Find("tbody").Find("tr").Each(func(i int, row *goquery.Selection) {
-			p := make(map[string]interface{}, 0)
+			p := make(map[string]string, 0)
 			row.Find("td").Each(func(j int, td *goquery.Selection) {
-				if j < len(cols) {
-					if (cols[j] == "Pos") || IsLetter(td.Text()) {
-						p[cols[j]] = td.Text()
-					} else {
-						n, err := strconv.ParseFloat(td.Text(), 64)
-						if err != nil {
-							log.Fatalf("error converting string to float: %v", err)
-						}
-						p[cols[j]] = n
-					}
-				}
+				p[cols[j]] = td.Text()
 			})
-			np := new(Player)
-			np.SetData(p)
-			players = append(players, np)
+			ps[p["Name"]] = p
 		})
 	})
+
+	// create player objects
+	for p, _ := range ps {
+
+		np := Player{
+			PA:  strconv.ParseInt(ps[p]["PA"], 1, 64),
+			AB:  0,
+			R:   0,
+			H:   0,
+			B2:  0,
+			B3:  0,
+			HR:  0,
+			RBI: 0,
+			SB:  0,
+			CS:  0,
+			BB:  0,
+			SO:  0,
+			TB:  0,
+			GBP: 0,
+			HBP: 0,
+			SH:  0,
+			SF:  0,
+			IBB: 0,
+			W:   0,
+			L:   0,
+			WP:  0,
+			BK:  0,
+			BF:  0,
+			SV:  0,
+			ER:  0,
+			IP:  0,
+		}
+		players = append(players, &np)
+	}
 	return players
 }
 
 func GetTeams(teams []*Team) {
-	data := make(map[string][]*Player)
+	data := make([]*Player, 0)
 	var wg = sync.WaitGroup{}
 
 	for _, team := range teams {
