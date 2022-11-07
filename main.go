@@ -13,6 +13,7 @@ func main() {
 
 	ts := make([]*Team, 0)
 
+	// create team structs
 	for i := 0; i < 2; i++ {
 		t := strings.Split(CLInput(), " ")
 		nt := new(Team)
@@ -20,18 +21,13 @@ func main() {
 		nt.SetYear(t[0])
 		ts = append(ts, nt)
 	}
+
+	// scrape player data with go routines
 	GetTeams(ts)
 
-	games := make([]*Game, 10000)
-	for i := 0; i < 16200; i++ {
-		ng := new(Game)
-		ng.SetHome(ts[0])
-		ng.SetAway(ts[1])
-		games = append(games, ng)
-	}
+	// create player objects and assign them to their teams
 
-	// play a ton of games at once with go routines
-
+	// simulate lots of games
 }
 
 func CLInput() string {

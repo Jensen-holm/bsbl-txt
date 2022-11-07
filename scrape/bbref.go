@@ -1,10 +1,8 @@
 package scrape
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"unicode"
 )
 
 import (
@@ -13,17 +11,6 @@ import (
 	"strings"
 	"sync"
 )
-
-func IsLetter(s string) bool {
-	// this line is pretty ghetto
-	s = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "*", ""), ".", ""), "#", ""), "-", "")
-	for _, r := range s {
-		if !unicode.IsLetter(r) {
-			return false
-		}
-	}
-	return true
-}
 
 // HandleGetRequest -> we want to add headers in the future
 func HandleGetRequest(str string, url string, r *http.Response, err error) {
@@ -160,5 +147,4 @@ func GetTeams(teams []*Team) {
 		}(&wg, team)
 	}
 	wg.Wait()
-	fmt.Println(data)
 }
