@@ -5,8 +5,10 @@ import (
 	"fmt"
 	. "github.com/Jensen-holm/SportSimulation/bsbl"
 	. "github.com/Jensen-holm/SportSimulation/scrape"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -26,12 +28,23 @@ func main() {
 	// and assign them with their corresponding teams
 	GetTeams(ts)
 
-	// testing the plate appearance function
-	tstHitter := ts[0].Hitters()[10]
-	tstPitcher := ts[1].Pitchers()[10]
-	fmt.Println(PA(tstHitter, tstPitcher))
-
 	// simulate lots of games
+	st1 := time.Now()
+	for i := 0; i < 100000; i++ {
+		PA(ts[0].Hitters()[0], ts[1].Pitchers()[rand.Intn(len(ts[1].Pitchers()))])
+	}
+
+	dur1 := time.Since(st1)
+	fmt.Printf("Without Go Routines: %v\n", dur1)
+
+	st2 := time.Now()
+
+	for i := 0; i < 100000; i++ {
+		go PA(ts[0].Hitters()[0], ts[1].Pitchers()[0])
+	}
+
+	dur2 := time.Since(st2)
+	fmt.Printf("With go routines: %v", dur2)
 
 }
 

@@ -4,6 +4,8 @@ import (
 	"strconv"
 )
 
+// This code does not look good, but I have not found a better way to write it yet
+
 type Hitter struct {
 	name string
 	pos  string

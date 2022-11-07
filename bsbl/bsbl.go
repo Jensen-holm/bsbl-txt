@@ -1,11 +1,6 @@
 package bsbl
 
-import "fmt"
-
-func PA(h *Hitter, p *Pitcher) (string, error) {
-
-	fmt.Println(h.name)
-	fmt.Println(p.name)
+func PA(h *Hitter, p *Pitcher) {
 
 	outcomes := []string{"H", "BB", "HBP", "IPO"}
 	weights := []float64{
@@ -17,7 +12,7 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 
 	result, err := Choices(outcomes, weights)
 	if err != nil {
-		return "", err
+		return
 	}
 
 	if result == "H" {
@@ -28,11 +23,11 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 			(h.B3 + p.B3) / float64(2),
 			(h.HR + p.HRA) / float64(2),
 		}
-		hResult, err := Choices(hOutcomes, hWeights)
+		_, err := Choices(hOutcomes, hWeights)
 		if err != nil {
-			return "", err
+			return
 		}
-		return hResult, nil
+		return
 	}
-	return result, nil
+	return
 }

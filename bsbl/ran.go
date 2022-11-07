@@ -11,12 +11,19 @@ import (
 // probabilities monte carlo simulation no matter which
 // metrics we decide to build the simulation around
 
+func IntAbs(i int) int {
+	if i > 0 {
+		return i
+	}
+	return i + (i * -2)
+}
+
 // Choices -> Chooses an element from a slice of strings based on weighted
 // requires that the length of the two input parameters are equal
 func Choices(arr []string, weights []float64) (string, error) {
 	rand.Seed(time.Now().UnixNano())
-
 	l := len(arr)
+
 	if l != len(weights) {
 		return "", fmt.Errorf("in the choices function the length of the outcome and weight slices must be equal")
 	}
@@ -28,9 +35,9 @@ func Choices(arr []string, weights []float64) (string, error) {
 		if rNum <= wt {
 			return arr[i], nil
 		}
-		if weights[i] >= float64(max) {
-			max = i + 1
+		if weights[i] >= weights[max] {
+			max = i
 		}
 	}
-	return arr[max-1], nil
+	return arr[max], nil
 }
