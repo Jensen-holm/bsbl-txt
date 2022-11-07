@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -39,9 +40,13 @@ func main() {
 
 	st2 := time.Now()
 
+	var wg sync.WaitGroup
 	for i := 0; i < 100000; i++ {
+		wg.Add(1)
 		go PA(ts[0].Hitters()[0], ts[1].Pitchers()[0])
+		wg.Done()
 	}
+	wg.Wait()
 
 	dur2 := time.Since(st2)
 	fmt.Printf("With go routines: %v", dur2)
