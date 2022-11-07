@@ -22,8 +22,6 @@ func main() {
 	}
 	GetTeams(ts)
 
-	ts[0].Hitters()[0].PaProbsHit()
-
 	games := make([]*Game, 10000)
 	for i := 0; i < 16200; i++ {
 		ng := new(Game)

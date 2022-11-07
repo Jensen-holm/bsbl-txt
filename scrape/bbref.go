@@ -1,9 +1,9 @@
 package scrape
 
 import (
+	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"unicode"
 )
 
@@ -86,7 +86,7 @@ func FindTeamBB(yearHref string, team string) (string, error) {
 	return teamHref, nil
 }
 
-func FindPlayers(teamName string, teamHref string) (map[string]map[string]string, map[string]map[string]string, error) {
+func FindPlayers(teamName string, teamHref string) ([]map[string]string, []map[string]string, error) {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamName, teamHref, r, err)
 
@@ -103,9 +103,8 @@ func FindPlayers(teamName string, teamHref string) (map[string]map[string]string
 	return pitchers, hitters, nil
 }
 
-func ParseBBTbl(tbl *goquery.Selection) []*Player {
-	players := make([]*Player, 0)
-	ps := make(map[string]map[string]string, 0)
+func ParseBBTbl(tbl *goquery.Selection) []map[string]string {
+	players := make([]map[string]string, 0)
 	cols := make([]string, 0)
 	tbl.Each(func(i int, tbl *goquery.Selection) {
 		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
@@ -123,48 +122,16 @@ func ParseBBTbl(tbl *goquery.Selection) []*Player {
 			row.Find("td").Each(func(j int, td *goquery.Selection) {
 				p[cols[j]] = td.Text()
 			})
-			ps[p["Name"]] = p
+			players = append(players, p)
 		})
 	})
-
-	// create player objects
-	for p, _ := range ps {
-
-		np := Player{
-			PA:  strconv.ParseInt(ps[p]["PA"], 1, 64),
-			AB:  0,
-			R:   0,
-			H:   0,
-			B2:  0,
-			B3:  0,
-			HR:  0,
-			RBI: 0,
-			SB:  0,
-			CS:  0,
-			BB:  0,
-			SO:  0,
-			TB:  0,
-			GBP: 0,
-			HBP: 0,
-			SH:  0,
-			SF:  0,
-			IBB: 0,
-			W:   0,
-			L:   0,
-			WP:  0,
-			BK:  0,
-			BF:  0,
-			SV:  0,
-			ER:  0,
-			IP:  0,
-		}
-		players = append(players, &np)
-	}
 	return players
 }
 
+// GetTeams -> Concurrently calls the functions above to scrape baseball reference
 func GetTeams(teams []*Team) {
-	data := make([]*Player, 0)
+
+	data := make([]map[string]string, 0)
 	var wg = sync.WaitGroup{}
 
 	for _, team := range teams {
@@ -187,20 +154,11 @@ func GetTeams(teams []*Team) {
 				panic(err)
 			}
 
-			data[tm.Name()+" Hitters"] = hs
-			data[tm.Name()+" Pitchers"] = ps
+			data = append(data, hs...)
+			data = append(data, ps...)
+
 		}(&wg, team)
 	}
 	wg.Wait()
-	for k, v := range data {
-		for _, tm := range teams {
-			if strings.Contains(k, tm.Name()) {
-				if strings.Contains(k, "Pitchers") {
-					tm.SetPitchers(v)
-				} else {
-					tm.SetHitters(v)
-				}
-			}
-		}
-	}
+	fmt.Println(data)
 }
