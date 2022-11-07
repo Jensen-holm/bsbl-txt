@@ -2,10 +2,10 @@ package bsbl
 
 // Player -> Contains Simple Data about a player scraped from baseball reference
 type Player struct {
-	data map[string]string
+	data map[string]interface{}
 }
 
-func (p *Player) SetData(d map[string]string) {
+func (p *Player) SetData(d map[string]interface{}) {
 	p.data = d
 }
 

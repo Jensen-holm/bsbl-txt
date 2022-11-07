@@ -22,6 +22,8 @@ func main() {
 	}
 	GetTeams(ts)
 
+	fmt.Println(ts[1].Hitters()[3])
+
 	games := make([]*Game, 10000)
 	for i := 0; i < 16200; i++ {
 		ng := new(Game)

@@ -3,6 +3,8 @@ package scrape
 import (
 	"log"
 	"net/http"
+	"strconv"
+	"unicode"
 )
 
 import (
@@ -11,6 +13,16 @@ import (
 	"strings"
 	"sync"
 )
+
+func IsLetter(s string) bool {
+	s = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(s, " ", ""), "*", ""), ".", ""), "#", "")
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
 
 // HandleGetRequest -> we want to add headers in the future
 func HandleGetRequest(str string, url string, r *http.Response, err error) {
@@ -105,10 +117,18 @@ func ParseBBTbl(tbl *goquery.Selection) []*Player {
 			})
 		})
 		tbl.Find("tbody").Find("tr").Each(func(i int, row *goquery.Selection) {
-			p := make(map[string]string, 0)
+			p := make(map[string]interface{}, 0)
 			row.Find("td").Each(func(j int, td *goquery.Selection) {
 				if j < len(cols) {
-					p[cols[j]] = td.Text()
+					if (cols[j] == "Pos") || IsLetter(td.Text()) {
+						p[cols[j]] = td.Text()
+					} else {
+						n, err := strconv.ParseFloat(td.Text(), 64)
+						if err != nil {
+							log.Fatalf("error converting string to float: %v", err)
+						}
+						p[cols[j]] = n
+					}
 				}
 			})
 			np := new(Player)
