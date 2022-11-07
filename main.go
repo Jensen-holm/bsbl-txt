@@ -21,6 +21,17 @@ func main() {
 		ts = append(ts, nt)
 	}
 	GetTeams(ts)
+
+	games := make([]*Game, 10000)
+	for i := 0; i < 16200; i++ {
+		ng := new(Game)
+		ng.SetHome(ts[0])
+		ng.SetAway(ts[1])
+		games = append(games, ng)
+	}
+
+	// play a ton of games at once with go routines
+
 }
 
 func CLInput() string {

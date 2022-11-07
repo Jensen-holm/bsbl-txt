@@ -1,10 +1,13 @@
 package scrape
 
 import (
-	. "github.com/Jensen-holm/SportSimulation/bsbl"
-	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
+)
+
+import (
+	. "github.com/Jensen-holm/SportSimulation/bsbl"
+	"github.com/PuerkitoBio/goquery"
 	"strings"
 	"sync"
 )
@@ -24,7 +27,7 @@ func HandleGetRequest(str string, url string, r *http.Response, err error) {
 
 var bbPrefix = "https://baseball-reference.com"
 
-func FindYrBB(year string) string {
+func FindYrBB(year string) (string, error) {
 	var def = "https://baseball-reference.com/leagues/"
 	r, err := http.Get(def)
 	HandleGetRequest(year, def, r, err)
@@ -32,7 +35,7 @@ func FindYrBB(year string) string {
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	var yrHref string
@@ -44,17 +47,17 @@ func FindYrBB(year string) string {
 			}
 		})
 	})
-	return yrHref
+	return yrHref, nil
 }
 
-func FindTeamBB(yearHref string, team string) string {
+func FindTeamBB(yearHref string, team string) (string, error) {
 	r, err := http.Get(yearHref)
 	HandleGetRequest(team, yearHref, r, err)
 
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	var teamHref string
@@ -67,24 +70,24 @@ func FindTeamBB(yearHref string, team string) string {
 			}
 		}
 	})
-	return teamHref
+	return teamHref, nil
 }
 
-func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player) {
+func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player, error) {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamName, teamHref, r, err)
 
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	batTbl := doc.Find("table#team_batting")
 	pitTbl := doc.Find("table#team_pitching")
 	pitchers := ParseBBTbl(pitTbl)
 	hitters := ParseBBTbl(batTbl)
-	return pitchers, hitters
+	return pitchers, hitters, nil
 }
 
 func ParseBBTbl(tbl *goquery.Selection) []*Player {
@@ -119,13 +122,27 @@ func ParseBBTbl(tbl *goquery.Selection) []*Player {
 func GetTeams(teams []*Team) {
 	data := make(map[string][]*Player)
 	var wg = sync.WaitGroup{}
+
 	for _, team := range teams {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, tm *Team) {
 			defer wg.Done()
-			yearLink := FindYrBB(tm.Year())
-			teamLink := FindTeamBB(yearLink, tm.Name())
-			hs, ps := FindPlayers(tm.Name(), teamLink)
+
+			yearLink, err := FindYrBB(tm.Year())
+			if err != nil {
+				panic(err)
+			}
+
+			teamLink, err := FindTeamBB(yearLink, tm.Name())
+			if err != nil {
+				panic(err)
+			}
+
+			hs, ps, err := FindPlayers(tm.Name(), teamLink)
+			if err != nil {
+				panic(err)
+			}
+
 			data[tm.Name()+" Hitters"] = hs
 			data[tm.Name()+" Pitchers"] = ps
 		}(&wg, team)
