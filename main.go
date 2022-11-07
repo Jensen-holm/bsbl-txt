@@ -25,10 +25,14 @@ func main() {
 	// scrape player data with go routines
 	// and assign them with their corresponding teams
 	GetTeams(ts)
-	fmt.Println(ts[0].Name())
-	fmt.Println(ts[0].Hitters()[0])
+
+	// testing the plate appearance function
+	tstHitter := ts[0].Hitters()[10]
+	tstPitcher := ts[1].Pitchers()[10]
+	fmt.Println(PA(tstHitter, tstPitcher))
 
 	// simulate lots of games
+
 }
 
 func CLInput() string {

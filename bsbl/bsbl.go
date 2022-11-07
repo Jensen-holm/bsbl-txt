@@ -1,27 +1,38 @@
 package bsbl
 
-//// Choices -> Select an element from a slice given weights
-//// assumes that the length of the sl and weights slices is equal
-//// and that the weights are floats between 0 and 1
-//func Choices(sl []interface{}, weights []float64) string {
-//	var max int = 0
-//	var c string
-//	for i := 0; i < len(sl); i++ {
-//		rNum := rand.Intn(100)
-//		if rNum <= int((100 * weights[i])) {
-//			return sl[i]
-//		} else {
-//			if int(weights[i]) > max {
-//				max = sl[i]
-//			}
-//		}
-//	}
-//	return sl[max]
-//}
-//
-//func PA(h *Player, p *Player) (string, error) {
-//	// choose an outcome weighted by probabilities
-//	hProbs := h.
-//
-//	return "", nil
-//}
+import "fmt"
+
+func PA(h *Hitter, p *Pitcher) (string, error) {
+
+	fmt.Println(h.name)
+	fmt.Println(p.name)
+
+	outcomes := []string{"H", "BB", "HBP", "IPO"}
+	weights := []float64{
+		(h.H + p.HA) / float64(2), // hit prob
+		(h.BB + p.BB) / float64(2),
+		(h.HBP + p.HBP) / float64(2),
+		(h.IPO + p.IPO) / float64(2),
+	}
+
+	result, err := Choices(outcomes, weights)
+	if err != nil {
+		return "", err
+	}
+
+	if result == "H" {
+		hOutcomes := []string{"1B", "2B", "3B", "HR"}
+		hWeights := []float64{
+			(h.B1 + p.B1) / float64(2),
+			(h.B2 + p.B2) / float64(2),
+			(h.B3 + p.B3) / float64(2),
+			(h.HR + p.HRA) / float64(2),
+		}
+		hResult, err := Choices(hOutcomes, hWeights)
+		if err != nil {
+			return "", err
+		}
+		return hResult, nil
+	}
+	return result, nil
+}
