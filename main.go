@@ -30,9 +30,12 @@ func main() {
 	GetTeams(ts)
 
 	// simulate lots of games
+	r1 := make([]string, 0)
 	st1 := time.Now()
+
 	for i := 0; i < 10000; i++ {
-		PA(ts[0].Hitters()[0], ts[1].Pitchers()[rand.Intn(len(ts[1].Pitchers()))])
+		r, _ := PA(ts[0].Hitters()[0], ts[1].Pitchers()[rand.Intn(len(ts[1].Pitchers()))])
+		r1 = append(r1, r)
 	}
 
 	dur1 := time.Since(st1)
