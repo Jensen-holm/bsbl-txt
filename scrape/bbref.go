@@ -1,12 +1,12 @@
 package scrape
 
 import (
+	. "github.com/Jensen-holm/SportSimulation/bsbl"
 	"log"
 	"net/http"
 )
 
 import (
-	. "github.com/Jensen-holm/SportSimulation/bsbl"
 	"github.com/PuerkitoBio/goquery"
 	"strings"
 	"sync"
@@ -118,7 +118,7 @@ func ParseBBTbl(tbl *goquery.Selection) []map[string]string {
 // GetTeams -> Concurrently calls the functions above to scrape baseball reference
 func GetTeams(teams []*Team) {
 
-	data := make([]map[string]string, 0)
+	data := make([][]map[string]string, 0)
 	var wg = sync.WaitGroup{}
 
 	for _, team := range teams {
@@ -141,10 +141,27 @@ func GetTeams(teams []*Team) {
 				panic(err)
 			}
 
-			data = append(data, hs...)
-			data = append(data, ps...)
+			data = append(data, hs)
+			data = append(data, ps)
 
 		}(&wg, team)
 	}
 	wg.Wait()
+
+	// create player objects and assign them to their teams
+	// need to make sure the right players go to the right teams
+	for i, tm := range data {
+		ps := make([]*Pitcher, 0)
+		hs := make([]*Hitter, 0)
+		for _, p := range tm {
+			if IsPitcher(p) {
+				ps = append(ps, NewPitcher(p))
+				continue
+			}
+			hs = append(hs, NewHitter(p))
+		}
+		teams[i].SetPitchers(ps)
+		teams[i].SetHitters(hs)
+
+	}
 }

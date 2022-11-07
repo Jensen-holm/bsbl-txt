@@ -1,6 +1,9 @@
 package bsbl
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 type Hitter struct {
 	name string
@@ -22,6 +25,13 @@ type Hitter struct {
 	SH   int64
 	SF   int64
 	IBB  int64
+}
+
+func IsPitcher(d map[string]string) bool {
+	if strings.Contains(d["Pos"], "P") {
+		return true
+	}
+	return false
 }
 
 // NewHitter -> Assumes that the

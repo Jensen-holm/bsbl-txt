@@ -25,6 +25,8 @@ func main() {
 	// scrape player data with go routines
 	GetTeams(ts)
 
+	fmt.Println(ts[0].Name())
+	fmt.Println(ts[0].Hitters()[0])
 	// create player objects and assign them to their teams
 
 	// simulate lots of games
