@@ -31,7 +31,7 @@ func main() {
 
 	// simulate lots of games
 	st1 := time.Now()
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 10000; i++ {
 		PA(ts[0].Hitters()[0], ts[1].Pitchers()[rand.Intn(len(ts[1].Pitchers()))])
 	}
 
@@ -41,16 +41,20 @@ func main() {
 	st2 := time.Now()
 
 	var wg sync.WaitGroup
-	for i := 0; i < 100000; i++ {
-		wg.Add(1)
-		go PA(ts[0].Hitters()[0], ts[1].Pitchers()[0])
-		wg.Done()
+	wg.Add(10000)
+	results := make([]string, 0)
+
+	for i := 0; i < 10000; i++ {
+		go func() {
+			defer wg.Done()
+			r, _ := PA(ts[0].Hitters()[0], ts[1].Pitchers()[0])
+			results = append(results, r)
+		}()
 	}
 	wg.Wait()
 
 	dur2 := time.Since(st2)
 	fmt.Printf("With go routines: %v", dur2)
-
 }
 
 func CLInput() string {

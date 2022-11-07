@@ -1,6 +1,6 @@
 package bsbl
 
-func PA(h *Hitter, p *Pitcher) {
+func PA(h *Hitter, p *Pitcher) (string, error) {
 
 	outcomes := []string{"H", "BB", "HBP", "IPO"}
 	weights := []float64{
@@ -12,7 +12,7 @@ func PA(h *Hitter, p *Pitcher) {
 
 	result, err := Choices(outcomes, weights)
 	if err != nil {
-		return
+		return "", err
 	}
 
 	if result == "H" {
@@ -23,11 +23,11 @@ func PA(h *Hitter, p *Pitcher) {
 			(h.B3 + p.B3) / float64(2),
 			(h.HR + p.HRA) / float64(2),
 		}
-		_, err := Choices(hOutcomes, hWeights)
+		hResult, err := Choices(hOutcomes, hWeights)
 		if err != nil {
-			return
+			return "", err
 		}
-		return
+		return hResult, nil
 	}
-	return
+	return result, nil
 }
