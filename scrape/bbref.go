@@ -59,7 +59,7 @@ func FindTeamBB(yearHref string, team string) (string, error) {
 	return teamHref, nil
 }
 
-func FindPlayers(teamName string, teamHref string) ([]map[string]string, []map[string]string, error) {
+func FindPlayers(teamName string, teamHref string) ([]*Pitcher, []*Hitter, error) {
 	r, err := http.Get(teamHref)
 	HandleGetRequest(teamName, teamHref, r, err)
 
@@ -71,8 +71,19 @@ func FindPlayers(teamName string, teamHref string) ([]map[string]string, []map[s
 
 	batTbl := doc.Find("table#team_batting")
 	pitTbl := doc.Find("table#team_pitching")
-	pitchers := ParseBBTbl(pitTbl)
-	hitters := ParseBBTbl(batTbl)
+	p := ParseBBTbl(pitTbl)
+	h := ParseBBTbl(batTbl)
+
+	hitters := make([]*Hitter, 0)
+	for _, hitter := range h {
+		hitters = append(hitters, NewHitter(hitter))
+	}
+
+	pitchers := make([]*Pitcher, 0)
+	for _, pitcher := range p {
+		pitchers = append(pitchers, NewPitcher(pitcher))
+	}
+
 	return pitchers, hitters, nil
 }
 
@@ -104,7 +115,6 @@ func ParseBBTbl(tbl *goquery.Selection) []map[string]string {
 // GetTeams -> Concurrently calls the functions above to scrape baseball reference
 func GetTeams(teams []*Team) {
 
-	data := make([][]map[string]string, 0)
 	var wg = sync.WaitGroup{}
 
 	// need to make sure that we need a results channel
@@ -125,31 +135,15 @@ func GetTeams(teams []*Team) {
 				panic(err)
 			}
 
-			hs, ps, err := FindPlayers(tm.Name(), teamLink)
+			ps, hs, err := FindPlayers(tm.Name(), teamLink)
 			if err != nil {
 				panic(err)
 			}
 
-			data = append(data, hs)
-			data = append(data, ps)
+			tm.SetHitters(hs)
+			tm.SetPitchers(ps)
 
 		}(&wg, team)
 	}
 	wg.Wait()
-
-	// create player objects and assign them to their teams
-	// need to make sure the right players go to the right teams
-	for i, tm := range data {
-		ps := make([]*Pitcher, 0)
-		hs := make([]*Hitter, 0)
-		for _, p := range tm {
-			if IsPitcher(p) {
-				ps = append(ps, NewPitcher(p))
-				continue
-			}
-			hs = append(hs, NewHitter(p))
-		}
-		teams[i].SetPitchers(ps)
-		teams[i].SetHitters(hs)
-	}
 }
