@@ -39,7 +39,7 @@ func main() {
 	}
 
 	dur1 := time.Since(st1)
-	fmt.Printf("Without Go Routines: %v\n", dur1)
+	fmt.Println(dur1)
 
 	st2 := time.Now()
 
@@ -51,6 +51,7 @@ func main() {
 		go func() {
 			defer wg.Done()
 			r, _ := PA(ts[0].Hitters()[0], ts[1].Pitchers()[0])
+			fmt.Println(r)
 			results = append(results, r)
 		}()
 	}
