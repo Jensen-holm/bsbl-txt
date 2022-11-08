@@ -1,10 +1,8 @@
 package scrape
 
 import (
-	"fmt"
 	. "github.com/Jensen-holm/SportSimulation/bsbl"
 	"net/http"
-	"time"
 )
 
 import (
@@ -117,36 +115,10 @@ func ParseBBTbl(tbl *goquery.Selection) []map[string]string {
 // GetTeams -> Concurrently calls the functions above to scrape baseball reference
 func GetTeams(teams []*Team) {
 
-	// benchmark
-	st := time.Now()
-	for _, team := range teams {
-		yearLink, err := FindYrBB(team.Year())
-		if err != nil {
-			panic(err)
-		}
-
-		teamLink, err := FindTeamBB(yearLink, team.Name())
-		if err != nil {
-			panic(err)
-		}
-
-		ps, hs, err := FindPlayers(team.Name(), teamLink)
-		if err != nil {
-			panic(err)
-		}
-		team.SetHitters(hs)
-		team.SetPitchers(ps)
-
-	}
-	dur1 := time.Since(st)
-	fmt.Printf("%v\n", dur1)
-
 	var wg = sync.WaitGroup{}
-
 	// need to make sure that we need a results channel
 	// to have each routine check to make sure that we don't
 	// do the same iteration more than once
-	st2 := time.Now()
 	for _, team := range teams {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup, tm *Team) {
@@ -173,6 +145,4 @@ func GetTeams(teams []*Team) {
 		}(&wg, team)
 	}
 	wg.Wait()
-	et := time.Since(st2)
-	fmt.Println(et)
 }

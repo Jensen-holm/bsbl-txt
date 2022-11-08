@@ -11,16 +11,10 @@ import (
 // probabilities monte carlo simulation no matter which
 // metrics we decide to build the simulation around
 
-func IntAbs(i int) int {
-	if i > 0 {
-		return i
-	}
-	return i + (i * -2)
-}
-
 // Choices -> Chooses an element from a slice of strings based on weighted
 // requires that the length of the two input parameters are equal
 func Choices(arr []string, weights []float64) (string, error) {
+	// this seed could be problematic with go routines
 	rand.Seed(time.Now().UnixNano())
 	l := len(arr)
 

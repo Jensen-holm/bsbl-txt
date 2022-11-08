@@ -5,11 +5,8 @@ import (
 	"fmt"
 	. "github.com/Jensen-holm/SportSimulation/bsbl"
 	. "github.com/Jensen-holm/SportSimulation/scrape"
-	"math/rand"
 	"os"
 	"strings"
-	"sync"
-	"time"
 )
 
 func main() {
@@ -29,36 +26,11 @@ func main() {
 	// and assign them with their corresponding teams
 	GetTeams(ts)
 
-	// simulate lots of games
-	r1 := make([]string, 0)
-	st1 := time.Now()
+	ts[0].EstimateLineup()
 
-	for i := 0; i < 10000; i++ {
-		r, _ := PA(ts[0].Hitters()[0], ts[1].Pitchers()[rand.Intn(len(ts[1].Pitchers()))])
-		r1 = append(r1, r)
+	for _, p := range ts[0].Lineup() {
+		fmt.Println(p.Name())
 	}
-
-	dur1 := time.Since(st1)
-	fmt.Println(dur1)
-
-	st2 := time.Now()
-
-	var wg sync.WaitGroup
-	wg.Add(10000)
-	results := make([]string, 0)
-
-	for i := 0; i < 10000; i++ {
-		go func() {
-			defer wg.Done()
-			r, _ := PA(ts[0].Hitters()[0], ts[1].Pitchers()[0])
-			fmt.Println(r)
-			results = append(results, r)
-		}()
-	}
-	wg.Wait()
-
-	dur2 := time.Since(st2)
-	fmt.Printf("With go routines: %v", dur2)
 }
 
 func CLInput() string {

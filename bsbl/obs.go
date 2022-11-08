@@ -1,6 +1,7 @@
 package bsbl
 
 import (
+	"sort"
 	"strconv"
 )
 
@@ -17,16 +18,20 @@ type Hitter struct {
 	B2   float64
 	B3   float64
 	HR   float64
+	TB   int64
 	SB   float64
-	// ATT is the probability of attempting to steal a base when on first
-	ATT float64
-	BB  float64
-	SO  float64
-	HBP float64
-	SH  float64
-	SF  float64
-	IBB float64
-	IPO float64
+	ATT  float64
+	BB   float64
+	SO   float64
+	HBP  float64
+	SH   float64
+	SF   float64
+	IBB  float64
+	IPO  float64
+}
+
+func (h *Hitter) Name() string {
+	return h.name
 }
 
 // NewHitter -> Assumes that the
@@ -45,6 +50,7 @@ func NewHitter(d map[string]string) *Hitter {
 	sb, _ := strconv.ParseInt(d["SB"], 0, 64)
 	cs, _ := strconv.ParseInt(d["CS"], 0, 64)
 	bb, _ := strconv.ParseInt(d["BB"], 0, 64)
+	tb, _ := strconv.ParseInt(d["TB"], 0, 64)
 	return &Hitter{
 		name: d["Name"],
 		pos:  d["Pos"],
@@ -56,6 +62,7 @@ func NewHitter(d map[string]string) *Hitter {
 		B2:   float64(b2) / float64(h),
 		B3:   float64(b3) / float64(h),
 		HR:   float64(hr) / float64(h),
+		TB:   tb,
 		SB:   float64(sb) / float64(cs),
 		ATT:  float64(sb) / float64(bb+(h-(b2+b3+hr))),
 		BB:   float64(bb) / float64(pa),
@@ -64,8 +71,7 @@ func NewHitter(d map[string]string) *Hitter {
 		SH:   float64(sh) / float64(pa),
 		SF:   float64(sf) / float64(pa),
 		IBB:  float64(ibb) / float64(pa),
-		// double check this one
-		IPO: float64(ab-h-bb-hbp) / float64(pa),
+		IPO:  float64(ab-h-bb-hbp) / float64(pa),
 	}
 }
 
@@ -124,6 +130,8 @@ type Team struct {
 	year     string
 	hitters  []*Hitter
 	pitchers []*Pitcher
+	lineup   []*Hitter
+	rotation []*Pitcher
 }
 
 func (tm *Team) SetName(n string) { tm.name = n }
@@ -141,3 +149,42 @@ func (tm *Team) Name() string { return tm.name }
 func (tm *Team) Hitters() []*Hitter { return tm.hitters }
 
 func (tm *Team) Pitchers() []*Pitcher { return tm.pitchers }
+
+// EstimateLineup -> Sorts players in the team.hitters slice by
+// finding the player at each position that had the most plate appearances
+func (tm *Team) EstimateLineup() {
+	l := map[string]*Hitter{}
+	for i, h := range tm.Hitters() {
+		if _, ok := l[h.pos]; ok && h.PA > l[h.pos].PA {
+			l[h.pos] = h
+		}
+		l[h.pos] = h
+
+		if i >= 9 {
+			break
+		}
+	}
+	line := make([]*Hitter, 0)
+	for _, p := range l {
+		line = append(line, p)
+	}
+	sort.Slice(line, func(i, j int) bool {
+		return line[i].H > line[j].H
+	})
+	tm.lineup = line
+}
+
+func (tm *Team) EstimateRotation() {
+	r := make([]*Pitcher, 0)
+	for _, p := range tm.Pitchers() {
+		if p.pos != "SP" {
+			continue
+		}
+		r = append(r, p)
+	}
+	tm.rotation = r
+}
+
+func (tm *Team) Lineup() []*Hitter {
+	return tm.lineup
+}

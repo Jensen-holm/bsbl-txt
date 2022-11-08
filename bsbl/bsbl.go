@@ -31,3 +31,17 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 	}
 	return result, nil
 }
+
+// HalfInning -> nxtHitter is the index in the lineup for the
+// next hitter in the hitting team lineup
+func HalfInning(nxtHitter int, homeTm *Team, awayTm *Team) {
+
+	var outs = 0
+	for {
+
+		outs += 1
+		if outs > 2 {
+			break
+		}
+	}
+}
