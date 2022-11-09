@@ -11,6 +11,9 @@ import (
 // probabilities monte carlo simulation no matter which
 // metrics we decide to build the simulation around
 
+// need to revisit this function
+// b/c I do not think that it is actually fair
+
 // Choices -> Chooses an element from a slice of strings based on weighted
 // requires that the length of the two input parameters are equal
 func Choices(arr []string, weights []float64) (string, error) {

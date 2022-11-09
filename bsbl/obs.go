@@ -182,9 +182,12 @@ func (tm *Team) EstimateRotation() {
 		}
 		r = append(r, p)
 	}
-	tm.rotation = r
+	sort.Slice(r, func(i, j int) bool {
+		return r[i].IP > r[j].IP
+	})
+	tm.rotation = r[:5]
 }
 
-func (tm *Team) Lineup() []*Hitter {
-	return tm.lineup
-}
+func (tm *Team) Lineup() []*Hitter { return tm.lineup }
+
+func (tm *Team) Rotation() []*Pitcher { return tm.rotation }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	. "github.com/Jensen-holm/SportSimulation/bsbl"
 	. "github.com/Jensen-holm/SportSimulation/scrape"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"os"
 	"strings"
 )
@@ -13,11 +15,13 @@ func main() {
 
 	ts := make([]*Team, 0)
 
+	caser := cases.Title(language.AmericanEnglish)
+
 	// create team structs
 	for i := 0; i < 2; i++ {
 		t := strings.Split(CLInput(), " ")
 		nt := new(Team)
-		nt.SetName(strings.Title(strings.Join(t[1:], " ")))
+		nt.SetName(caser.String(strings.Join(t[1:], " ")))
 		nt.SetYear(t[0])
 		ts = append(ts, nt)
 	}
