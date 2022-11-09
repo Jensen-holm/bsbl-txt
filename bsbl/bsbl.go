@@ -34,14 +34,32 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 
 // HalfInning -> nxtHitter is the index in the lineup for the
 // next hitter in the hitting team lineup
-func HalfInning(nxtHitter int, homeTm *Team, awayTm *Team) {
+func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Pitcher) (int, int, error) {
 
 	var outs = 0
+	var ab = nxtHitter
+	var runs = 0
+
 	for {
 
-		outs += 1
+		r, err := PA(hittingTm.Hitters()[ab], pitcher)
+		if err != nil {
+			return 0, 0, err
+		}
+
+		if r == "IPO" || r == "SO" {
+			outs += 1
+		}
+
+		ab += 1
+		if ab >= len(hittingTm.Hitters()) {
+			ab = 0
+		}
+
 		if outs > 2 {
 			break
 		}
+
 	}
+	return ab, runs, nil
 }

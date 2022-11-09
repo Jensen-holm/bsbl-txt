@@ -5,123 +5,94 @@ import (
 	"strconv"
 )
 
-// This code does not look good, but I have not found a better way to write it yet
+// sadly we may have to create more objects to accommodate data
+// scraped from other sites like baseball savant, probably want to
+// split it all into their own packages when we get to that point
 
+// Hitter -> this is specific to bbref players
 type Hitter struct {
-	name string
-	pos  string
-	age  string
-	PA   int64
-	AB   int64
-	H    float64
-	B1   float64
-	B2   float64
-	B3   float64
-	HR   float64
-	TB   int64
-	SB   float64
-	ATT  float64
-	BB   float64
-	SO   float64
-	HBP  float64
-	SH   float64
-	SF   float64
-	IBB  float64
-	IPO  float64
+	raw   map[string]string
+	nums  map[string]int64
+	attrs map[string]string
+	probs map[string]float64
 }
 
-func (h *Hitter) Name() string {
-	return h.name
-}
+func (h *Hitter) Stats() map[string]int64 { return h.nums }
 
-// NewHitter -> Assumes that the
-func NewHitter(d map[string]string) *Hitter {
-	pa, _ := strconv.ParseInt(d["PA"], 0, 64)
-	ab, _ := strconv.ParseInt(d["AB"], 0, 64)
-	h, _ := strconv.ParseInt(d["H"], 0, 64)
-	b2, _ := strconv.ParseInt(d["2B"], 0, 64)
-	b3, _ := strconv.ParseInt(d["3B"], 0, 64)
-	hr, _ := strconv.ParseInt(d["HR"], 0, 64)
-	so, _ := strconv.ParseInt(d["SO"], 0, 64)
-	hbp, _ := strconv.ParseInt(d["HBP"], 0, 64)
-	sh, _ := strconv.ParseInt(d["SH"], 0, 64)
-	sf, _ := strconv.ParseInt(d["SF"], 0, 64)
-	ibb, _ := strconv.ParseInt(d["IBB"], 0, 64)
-	sb, _ := strconv.ParseInt(d["SB"], 0, 64)
-	cs, _ := strconv.ParseInt(d["CS"], 0, 64)
-	bb, _ := strconv.ParseInt(d["BB"], 0, 64)
-	tb, _ := strconv.ParseInt(d["TB"], 0, 64)
-	return &Hitter{
-		name: d["Name"],
-		pos:  d["Pos"],
-		age:  d["Age"],
-		PA:   pa,
-		AB:   ab,
-		H:    float64(h) / float64(pa),
-		B1:   float64(h-(b2+b3+hr)) / float64(pa),
-		B2:   float64(b2) / float64(h),
-		B3:   float64(b3) / float64(h),
-		HR:   float64(hr) / float64(h),
-		TB:   tb,
-		SB:   float64(sb) / float64(cs),
-		ATT:  float64(sb) / float64(bb+(h-(b2+b3+hr))),
-		BB:   float64(bb) / float64(pa),
-		SO:   float64(so) / float64(pa),
-		HBP:  float64(hbp) / float64(pa),
-		SH:   float64(sh) / float64(pa),
-		SF:   float64(sf) / float64(pa),
-		IBB:  float64(ibb) / float64(pa),
-		IPO:  float64(ab-h-bb-hbp) / float64(pa),
+func (h *Hitter) Attrs() map[string]string { return h.attrs }
+
+func (h *Hitter) Probs() map[string]float64 { return h.probs }
+
+func (h *Hitter) ParseStats(d map[string]string) {
+	statMap := make(map[string]int64, 0)
+	attrMap := make(map[string]string, 0)
+	for stat, val := range d {
+		if s, err := strconv.ParseInt(val, 0, 64); err == nil {
+			statMap[stat] = s
+		} else {
+			attrMap[stat] = val
+		}
 	}
+	h.nums = statMap
+	h.attrs = attrMap
+}
+
+func (h *Hitter) CalcProbs(n map[string]int64) {
+	p := make(map[string]float64, 0)
+	for stat, val := range n {
+		if stat == "H" || stat == "BB" || stat == "HBP" || stat == "SO" || stat == "SH" || stat == "SF" {
+			p[stat] = float64(val) / float64(n["PA"])
+			continue
+		}
+		if stat == "1B" || stat == "2B" || stat == "3B" || stat == "HR" {
+			p[stat] = float64(val) / float64(n["PA"])
+			continue
+		}
+		if stat == "SB" {
+			p[stat] = float64(val)
+			p["ATT"] = float64(val) + float64(n["CS"])
+			continue
+		}
+	}
+	p["IPO"] = p["PA"] - (p["H"] + p["HBP"] + p["BB"] + p["SO"] + p["SH"] + p["SF"])
+	h.probs = p
+}
+
+// NewHitter -> Constructor for hitter objects
+func NewHitter(d map[string]string) *Hitter {
+	h := new(Hitter)
+	h.ParseStats(d)
+	h.CalcProbs(h.nums)
+	return h
 }
 
 type Pitcher struct {
-	name string
-	pos  string
-	age  string
-	HA   float64
-	B1   float64
-	B2   float64
-	B3   float64
-	HRA  float64
-	BB   float64
-	SO   float64
-	BK   float64
-	BF   int64
-	IP   float64
-	HBP  float64
-	IPO  float64
+	raw   map[string]string
+	nums  map[string]int64
+	attrs map[string]string
+	probs map[string]float64
 }
 
-// NewPitcher -> Assumes that the map entered into this function is that
-// of a player scraped off of a baseball reference team_pitching table
-// I wish I knew a better way to write these functions
-func NewPitcher(d map[string]string) *Pitcher {
-	ha, _ := strconv.ParseInt(d["H"], 0, 64)
-	b2, _ := strconv.ParseInt(d["2B"], 0, 64)
-	b3, _ := strconv.ParseInt(d["3B"], 0, 64)
-	hr, _ := strconv.ParseInt(d["HR"], 0, 64)
-	bb, _ := strconv.ParseInt(d["BB"], 0, 64)
-	so, _ := strconv.ParseInt(d["SO"], 0, 64)
-	bf, _ := strconv.ParseInt(d["BF"], 0, 64)
-	ip, _ := strconv.ParseFloat(d["IP"], 64)
-	hbp, _ := strconv.ParseInt(d["HBP"], 0, 64)
-	return &Pitcher{
-		name: d["Name"],
-		pos:  d["Pos"],
-		age:  d["Age"],
-		HA:   float64(ha) / float64(bf),
-		B1:   float64(ha-(b2+b3+hr)) / float64(ha),
-		B2:   float64(b2) / float64(ha),
-		B3:   float64(b3) / float64(ha),
-		HRA:  float64(hr) / float64(ha),
-		BB:   float64(bb) / float64(bf),
-		SO:   float64(so) / float64(bf),
-		BF:   bf,
-		IP:   ip,
-		HBP:  float64(hbp) / float64(bf),
-		IPO:  float64(bf-bb-so-ha-hbp) / float64(bf),
+// Duplicated code below but go does not support inheritance
+
+func (p *Pitcher) Stats() map[string]int64 { return p.nums }
+
+func (p *Pitcher) Attrs() map[string]string { return p.attrs }
+
+func (p *Pitcher) Probs() map[string]float64 { return p.probs }
+
+func (p *Pitcher) ParseStats(d map[string]string) {
+	statMap := make(map[string]int64, 0)
+	attrMap := make(map[string]string, 0)
+	for stat, val := range d {
+		if s, err := strconv.ParseInt(val, 0, 64); err == nil {
+			statMap[stat] = s
+		} else {
+			attrMap[stat] = d[stat]
+		}
 	}
+	p.nums = statMap
+	p.attrs = attrMap
 }
 
 // Team -> Contains Data about a team
