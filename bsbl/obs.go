@@ -17,6 +17,8 @@ type Hitter struct {
 	probs map[string]float64
 }
 
+func (h *Hitter) Name() string { return h.Attrs()["Name"] }
+
 func (h *Hitter) Stats() map[string]int64 { return h.nums }
 
 func (h *Hitter) Attrs() map[string]string { return h.attrs }
@@ -75,6 +77,8 @@ type Pitcher struct {
 
 // Duplicated code below but go does not support inheritance
 
+func (p *Pitcher) Name() string { return p.Attrs()["Name"] }
+
 func (p *Pitcher) Stats() map[string]int64 { return p.nums }
 
 func (p *Pitcher) Attrs() map[string]string { return p.attrs }
@@ -93,6 +97,29 @@ func (p *Pitcher) ParseStats(d map[string]string) {
 	}
 	p.nums = statMap
 	p.attrs = attrMap
+}
+
+func (p *Pitcher) CalcProbs(n map[string]int64) {
+	pr := make(map[string]float64, 0)
+	for stat, val := range n {
+		if stat == "H" || stat == "BB" || stat == "HBP" || stat == "SO" || stat == "SH" || stat == "SF" {
+			pr[stat] = float64(val) / float64(n["PA"])
+			continue
+		}
+		if stat == "1B" || stat == "2B" || stat == "3B" || stat == "HR" {
+			pr[stat] = float64(val) / float64(n["PA"])
+			continue
+		}
+	}
+	pr["IPO"] = pr["PA"] - (pr["H"] + pr["HBP"] + pr["BB"] + pr["SO"] + pr["SH"] + pr["SF"])
+	p.probs = pr
+}
+
+func NewPitcher(d map[string]string) *Pitcher {
+	p := new(Pitcher)
+	p.ParseStats(d)
+	p.CalcProbs(p.Stats())
+	return p
 }
 
 // Team -> Contains Data about a team
@@ -124,37 +151,37 @@ func (tm *Team) Pitchers() []*Pitcher { return tm.pitchers }
 // EstimateLineup -> Sorts players in the team.hitters slice by
 // finding the player at each position that had the most plate appearances
 func (tm *Team) EstimateLineup() {
-	l := map[string]*Hitter{}
-	for i, h := range tm.Hitters() {
-		if _, ok := l[h.pos]; ok && h.PA > l[h.pos].PA {
-			l[h.pos] = h
+	l := make(map[string]*Hitter, 0)
+	for _, h := range tm.Hitters() {
+		// if the position already exists in the map
+		if _, ok := l[h.Attrs()["Pos"]]; ok && h.Stats()["PA"] > 0 {
+			// check if the h has a higher prob than the one already in there
+			l[h.Attrs()["Pos"]] = h
+			continue
 		}
-		l[h.pos] = h
-
-		if i >= 9 {
-			break
-		}
+		// if it doesn't exist already, make them the defualt
+		l[h.Attrs()["Pos"]] = h
 	}
 	line := make([]*Hitter, 0)
-	for _, p := range l {
-		line = append(line, p)
+	for _, h := range l {
+		line = append(line, h)
 	}
 	sort.Slice(line, func(i, j int) bool {
-		return line[i].H > line[j].H
+		return line[i].Probs()["H"] > line[j].Probs()["H"]
 	})
-	tm.lineup = line
+	tm.lineup = line[:9]
 }
 
 func (tm *Team) EstimateRotation() {
 	r := make([]*Pitcher, 0)
 	for _, p := range tm.Pitchers() {
-		if p.pos != "SP" {
+		if p.Attrs()["Pos"] != "SP" {
 			continue
 		}
 		r = append(r, p)
 	}
 	sort.Slice(r, func(i, j int) bool {
-		return r[i].IP > r[j].IP
+		return r[i].Attrs()["BF"] > r[j].Attrs()["BF"]
 	})
 	tm.rotation = r[:5]
 }
