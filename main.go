@@ -3,8 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	. "github.com/Jensen-holm/SportSimulation/bsbl"
-	. "github.com/Jensen-holm/SportSimulation/scrape"
+	. "github.com/Jensen-holm/SportSimulation/bbref"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"os"

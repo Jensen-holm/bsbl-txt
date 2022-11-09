@@ -1,7 +1,7 @@
-package scrape
+package bbref
 
 import (
-	. "github.com/Jensen-holm/SportSimulation/bsbl"
+	. "github.com/Jensen-holm/SportSimulation/scrape"
 	"net/http"
 )
 

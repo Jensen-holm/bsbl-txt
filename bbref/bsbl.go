@@ -1,4 +1,6 @@
-package bsbl
+package bbref
+
+import "github.com/Jensen-holm/SportSimulation/bsbl"
 
 func PA(h *Hitter, p *Pitcher) (string, error) {
 	hp := h.Probs()
@@ -12,7 +14,7 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 		(hp["IPO"] + pp["IPO"]) / float64(2),
 	}
 
-	result, err := Choices(outcomes, weights)
+	result, err := bsbl.Choices(outcomes, weights)
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +27,7 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 			(hp["3B"] + pp["3B"]) / float64(2),
 			(hp["HR"] + pp["HR"]) / float64(2),
 		}
-		hResult, err := Choices(hOutcomes, hWeights)
+		hResult, err := bsbl.Choices(hOutcomes, hWeights)
 		if err != nil {
 			return "", err
 		}
