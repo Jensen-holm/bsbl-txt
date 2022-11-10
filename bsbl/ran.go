@@ -26,6 +26,7 @@ func Choices(arr []string, weights []float64) (string, error) {
 	}
 
 	rNum := float64(rand.Intn(100)) / float64(100)
+	fmt.Println(rNum)
 
 	var max int
 	for i := 0; i < l; i++ {

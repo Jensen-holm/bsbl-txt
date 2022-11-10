@@ -14,13 +14,13 @@ func main() {
 
 	ts := make([]*Team, 0)
 
-	caser := cases.Title(language.AmericanEnglish)
+	c := cases.Title(language.AmericanEnglish)
 
 	// create team structs
 	for i := 0; i < 2; i++ {
 		t := strings.Split(CLInput(), " ")
 		nt := new(Team)
-		nt.SetName(caser.String(strings.Join(t[1:], " ")))
+		nt.SetName(c.String(strings.Join(t[1:], " ")))
 		nt.SetYear(t[0])
 		ts = append(ts, nt)
 	}
@@ -34,19 +34,15 @@ func main() {
 		tm.EstimateRotation()
 	}
 
-	// not working
-	var ns int
-	err := SimsInput(ns)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(ns)
-
-	for i := 0; i < 1000000; i++ {
-		_, err = PA(ts[1].Hitters()[1], ts[0].Pitchers()[0])
+	// 16,200 sims by default
+	var ab int
+	for i := 0; i < 16200; i++ {
+		r, j, err := HalfInning(ab, ts[0], ts[0].Pitchers()[0])
 		if err != nil {
-			return
+			panic(err)
 		}
+		ab = j
+		fmt.Println(r)
 	}
 }
 
@@ -58,13 +54,4 @@ func CLInput() string {
 		return ""
 	}
 	return strings.Replace(input, "\n", "", 1)
-}
-
-func SimsInput(i int) error {
-	fmt.Println("\nNumber of Simulations: ")
-	_, err := fmt.Scanf("%d", &i)
-	if err != nil {
-		return err
-	}
-	return nil
 }

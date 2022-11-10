@@ -1,6 +1,7 @@
 package bbref
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 )
@@ -11,10 +12,11 @@ import (
 
 // Hitter -> this is specific to bbref players
 type Hitter struct {
-	raw   map[string]string
-	nums  map[string]int64
-	attrs map[string]string
-	probs map[string]float64
+	raw     map[string]string
+	nums    map[string]int64
+	attrs   map[string]string
+	probs   map[string]float64
+	results map[string]float64
 }
 
 func (h *Hitter) Name() string { return h.Attrs()["Name"] }
@@ -25,9 +27,18 @@ func (h *Hitter) Attrs() map[string]string { return h.attrs }
 
 func (h *Hitter) Probs() map[string]float64 { return h.probs }
 
+func (h *Hitter) Increment(stat string, num float64) {
+	if _, ok := h.results[stat]; ok {
+		h.results[stat] += 1
+		return
+	}
+	h.results[stat] = num
+}
+
 func (h *Hitter) ParseStats(d map[string]string) {
 	statMap := make(map[string]int64, 0)
 	attrMap := make(map[string]string, 0)
+	rMap := make(map[string]float64, 0)
 	for stat, val := range d {
 		if s, err := strconv.ParseInt(val, 0, 64); err == nil {
 			statMap[stat] = s
@@ -37,6 +48,7 @@ func (h *Hitter) ParseStats(d map[string]string) {
 	}
 	h.nums = statMap
 	h.attrs = attrMap
+	h.results = rMap
 }
 
 func (h *Hitter) CalcProbs(n map[string]int64) {
@@ -69,10 +81,11 @@ func NewHitter(d map[string]string) *Hitter {
 }
 
 type Pitcher struct {
-	raw   map[string]string
-	nums  map[string]int64
-	attrs map[string]string
-	probs map[string]float64
+	raw     map[string]string
+	nums    map[string]int64
+	attrs   map[string]string
+	probs   map[string]float64
+	results map[string]float64
 }
 
 // Duplicated code below but go does not support inheritance
@@ -85,9 +98,18 @@ func (p *Pitcher) Attrs() map[string]string { return p.attrs }
 
 func (p *Pitcher) Probs() map[string]float64 { return p.probs }
 
+func (p *Pitcher) Increment(stat string, num float64) {
+	if _, ok := p.results[stat]; ok {
+		p.results[stat] += 1
+		return
+	}
+	p.results[stat] = num
+}
+
 func (p *Pitcher) ParseStats(d map[string]string) {
 	statMap := make(map[string]int64, 0)
 	attrMap := make(map[string]string, 0)
+	rMap := make(map[string]float64, 0)
 	for stat, val := range d {
 		if s, err := strconv.ParseInt(val, 0, 64); err == nil {
 			statMap[stat] = s
@@ -97,6 +119,7 @@ func (p *Pitcher) ParseStats(d map[string]string) {
 	}
 	p.nums = statMap
 	p.attrs = attrMap
+	p.results = rMap
 }
 
 func (p *Pitcher) CalcProbs(n map[string]int64) {
@@ -119,6 +142,7 @@ func NewPitcher(d map[string]string) *Pitcher {
 	p := new(Pitcher)
 	p.ParseStats(d)
 	p.CalcProbs(p.Stats())
+	fmt.Println(p.Probs())
 	return p
 }
 
