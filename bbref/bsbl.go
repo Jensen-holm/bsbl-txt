@@ -4,7 +4,7 @@ import (
 	"github.com/Jensen-holm/SportSimulation/bsbl"
 )
 
-func PA(h *Hitter, p *Pitcher) (string, error) {
+func PA(h *Player, p *Player) (string, error) {
 	hp := h.Probs()
 	pp := p.Probs()
 
@@ -40,7 +40,7 @@ func PA(h *Hitter, p *Pitcher) (string, error) {
 
 // HalfInning -> nxtHitter is the index in the lineup for the
 // next hitter in the hitting team lineup
-func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Pitcher) (int, int, error) {
+func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, error) {
 
 	var outs = 0
 	var ab = nxtHitter

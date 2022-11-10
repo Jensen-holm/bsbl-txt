@@ -59,7 +59,7 @@ func FindTeamBB(yearHref string, team string) (string, error) {
 	return teamHref, nil
 }
 
-func FindPlayers(teamName string, teamHref string) ([]*Pitcher, []*Hitter, error) {
+func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player, error) {
 	r, err := http.Get(teamHref)
 	scrape.HandleGetRequest(teamName, teamHref, r, err)
 
@@ -74,14 +74,14 @@ func FindPlayers(teamName string, teamHref string) ([]*Pitcher, []*Hitter, error
 	p := ParseBBTbl(pitTbl)
 	h := ParseBBTbl(batTbl)
 
-	hitters := make([]*Hitter, 0)
+	hitters := make([]*Player, 0)
 	for _, hitter := range h {
-		hitters = append(hitters, NewHitter(hitter))
+		hitters = append(hitters, NewPlayer(hitter))
 	}
 
-	pitchers := make([]*Pitcher, 0)
+	pitchers := make([]*Player, 0)
 	for _, pitcher := range p {
-		pitchers = append(pitchers, NewPitcher(pitcher))
+		pitchers = append(pitchers, NewPlayer(pitcher))
 	}
 
 	return pitchers, hitters, nil

@@ -38,7 +38,7 @@ func main() {
 	// the hitter and pitcher object functions
 	// need to be redone
 	h := ts[0].Hitters()[0]
-	fmt.Println(h.Probs(), h.Attrs(), h.Stats())
+	fmt.Println(h.Probs(), h.Attrs(), h.Nums())
 
 }
 
