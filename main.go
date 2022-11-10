@@ -34,16 +34,12 @@ func main() {
 		tm.EstimateRotation()
 	}
 
-	// 16,200 sims by default
-	var ab int
-	for i := 0; i < 16200; i++ {
-		r, j, err := HalfInning(ab, ts[0], ts[0].Pitchers()[0])
-		if err != nil {
-			panic(err)
-		}
-		ab = j
-		fmt.Println(r)
-	}
+	// this is the current problem
+	// the hitter and pitcher object functions
+	// need to be redone
+	h := ts[0].Hitters()[0]
+	fmt.Println(h.Probs(), h.Attrs(), h.Stats())
+
 }
 
 func CLInput() string {
