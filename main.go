@@ -7,6 +7,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -29,10 +30,15 @@ func main() {
 	// and assign them with their corresponding teams
 	GetTeams(ts)
 
-	ts[0].EstimateLineup()
+	for _, tm := range ts {
+		tm.EstimateLineup()
+		tm.EstimateRotation()
+	}
 
-	for _, p := range ts[0].Lineup() {
-		fmt.Println(p.Name())
+	numSims := SimsInput()
+
+	for i := 0; i < numSims; i++ {
+
 	}
 }
 
@@ -44,4 +50,17 @@ func CLInput() string {
 		return ""
 	}
 	return strings.Replace(input, "\n", "", 1)
+}
+
+func SimsInput() int {
+	fmt.Println("\nNumber of Simulations: ")
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return 0
+	}
+	if n, err := strconv.Atoi(input); err == nil {
+		return n
+	}
+	return 0
 }

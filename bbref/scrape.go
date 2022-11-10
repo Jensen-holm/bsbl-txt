@@ -1,7 +1,7 @@
 package bbref
 
 import (
-	. "github.com/Jensen-holm/SportSimulation/scrape"
+	"github.com/Jensen-holm/SportSimulation/scrape"
 	"net/http"
 )
 
@@ -16,7 +16,7 @@ var bbPrefix = "https://baseball-reference.com"
 func FindYrBB(year string) (string, error) {
 	var def = "https://baseball-reference.com/leagues/"
 	r, err := http.Get(def)
-	HandleGetRequest(year, def, r, err)
+	scrape.HandleGetRequest(year, def, r, err)
 
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)
@@ -38,7 +38,7 @@ func FindYrBB(year string) (string, error) {
 
 func FindTeamBB(yearHref string, team string) (string, error) {
 	r, err := http.Get(yearHref)
-	HandleGetRequest(team, yearHref, r, err)
+	scrape.HandleGetRequest(team, yearHref, r, err)
 
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)
@@ -61,7 +61,7 @@ func FindTeamBB(yearHref string, team string) (string, error) {
 
 func FindPlayers(teamName string, teamHref string) ([]*Pitcher, []*Hitter, error) {
 	r, err := http.Get(teamHref)
-	HandleGetRequest(teamName, teamHref, r, err)
+	scrape.HandleGetRequest(teamName, teamHref, r, err)
 
 	defer r.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(r.Body)

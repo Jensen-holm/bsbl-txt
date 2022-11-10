@@ -17,7 +17,7 @@ import (
 // Choices -> Chooses an element from a slice of strings based on weighted
 // requires that the length of the two input parameters are equal
 func Choices(arr []string, weights []float64) (string, error) {
-	// this seed could be problematic with go routines
+
 	rand.Seed(time.Now().UnixNano())
 	l := len(arr)
 
@@ -26,6 +26,7 @@ func Choices(arr []string, weights []float64) (string, error) {
 	}
 
 	rNum := float64(rand.Intn(100)) / float64(100)
+
 	var max int
 	for i := 0; i < l; i++ {
 		wt := weights[i]
