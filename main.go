@@ -7,7 +7,6 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -35,10 +34,19 @@ func main() {
 		tm.EstimateRotation()
 	}
 
-	numSims := SimsInput()
+	// not working
+	var ns int
+	err := SimsInput(ns)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(ns)
 
-	for i := 0; i < numSims; i++ {
-
+	for i := 0; i < 1000000; i++ {
+		_, err = PA(ts[1].Hitters()[1], ts[0].Pitchers()[0])
+		if err != nil {
+			return
+		}
 	}
 }
 
@@ -52,15 +60,11 @@ func CLInput() string {
 	return strings.Replace(input, "\n", "", 1)
 }
 
-func SimsInput() int {
+func SimsInput(i int) error {
 	fmt.Println("\nNumber of Simulations: ")
-	reader := bufio.NewReader(os.Stdin)
-	input, err := reader.ReadString('\n')
+	_, err := fmt.Scanf("%d", &i)
 	if err != nil {
-		return 0
+		return err
 	}
-	if n, err := strconv.Atoi(input); err == nil {
-		return n
-	}
-	return 0
+	return nil
 }
