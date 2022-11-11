@@ -24,8 +24,10 @@ func NewTeam(name string, yr string) *Team {
 // finding the player at each position that had the most plate appearances
 func (tm *Team) EstimateLineup() {
 
-	sort.Slice(tm.Hitters(), func(i, j int) bool {
-		return tm.Hitters()[i].Nums()["PA"] > tm.Hitters()[j].Nums()["PA"]
+	hits := tm.Hitters()
+
+	sort.Slice(hits, func(i, j int) bool {
+		return hits[i].Nums()["PA"] > hits[j].Nums()["PA"]
 	})
 
 	l := make(map[string]*Player, 0)
@@ -51,14 +53,11 @@ func (tm *Team) EstimateLineup() {
 // on the team and sorts them by batters faced, returns the top 5
 // as an estimation of who on the team pitched the most
 func (tm *Team) EstimateRotation() {
-	// BF may not be the best way to do this
 	sort.Slice(tm.Pitchers(), func(i, j int) bool {
 		return tm.Pitchers()[i].Attrs()["BF"] > tm.Pitchers()[j].Attrs()["BF"]
 	})
 	tm.rotation = tm.Pitchers()[:5]
 }
-
-// may not need some of these
 
 func (tm *Team) SetName(n string) {
 	tm.name = n
