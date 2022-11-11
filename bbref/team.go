@@ -29,9 +29,9 @@ func (tm *Team) EstimateLineup() {
 		if _, ok := l[h.Attrs()["Pos"]]; ok && h.Nums()["PA"] > 0 {
 			// check if the h has a higher prob than the one already in there
 			l[h.Attrs()["Pos"]] = h
-			continue
+		} else {
+			l[h.Attrs()["Pos"]] = h
 		}
-		l[h.Attrs()["Pos"]] = h
 	}
 	line := make([]*Player, 0)
 	for _, h := range l {
@@ -50,9 +50,9 @@ func (tm *Team) EstimateRotation() {
 	r := make([]*Player, 0)
 	for _, p := range tm.Pitchers() {
 		if p.Attrs()["Pos"] != "SP" {
-			continue
+		} else {
+			r = append(r, p)
 		}
-		r = append(r, p)
 	}
 	sort.Slice(r, func(i, j int) bool {
 		return r[i].Attrs()["BF"] > r[j].Attrs()["BF"]

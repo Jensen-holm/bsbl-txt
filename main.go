@@ -26,11 +26,13 @@ func main() {
 
 	bbref.GetTeams(ts)
 
-	for _, tm := range ts {
-		tm.EstimateLineup()
-		tm.EstimateRotation()
+	for _, team := range ts {
+		team.EstimateRotation()
+		team.EstimateLineup()
+		for _, p := range team.Lineup() {
+			fmt.Println(p.Name())
+		}
 	}
-
 }
 
 func CLInput() string {

@@ -1,13 +1,13 @@
 package bbref
 
 import (
-	"fmt"
 	"strconv"
+	"strings"
 )
 
 type Player struct {
 	raw     map[string]string
-	nums    map[string]int
+	nums    map[string]int64
 	attrs   map[string]string
 	probs   map[string]float64
 	results map[string]int
@@ -26,21 +26,33 @@ func (p *Player) ParseRawData(d map[string]string) {
 	attrs := make(map[string]string, 0)
 	for stat, val := range d {
 		if n, err := strconv.ParseInt(val, 0, 64); err == nil {
-			fmt.Println(n)
 			nums[stat] = n
 		} else {
 			attrs[stat] = val
 		}
 	}
+	p.nums = nums
 }
 
-func (p *Player) CalcProbs(n map[string]int) {
+// CalcProbs -> For some reason right now this is returning a
+// map of Inf and -Inf to the probs attribute
+func (p *Player) CalcProbs(n map[string]int64) {
 	pr := make(map[string]float64, 0)
+	isPit := strings.Contains(p.Position(), "P")
+
 	for stat, val := range n {
 		if stat == "H" || stat == "BB" || stat == "HBP" || stat == "SO" || stat == "SH" || stat == "SF" {
-			pr[stat] = float64(val) / float64(n["PA"])
+			if isPit {
+				pr[stat] = float64(val) / float64(n["BF"])
+			} else {
+				pr[stat] = float64(val) / float64(n["PA"])
+			}
 		} else if stat == "1B" || stat == "2B" || stat == "3B" || stat == "HR" {
-			pr[stat] = float64(val) / float64(n["PA"])
+			if isPit {
+				pr[stat] = float64(val) / float64(n["BF"])
+			} else {
+				pr[stat] = float64(val) / float64(n["PA"])
+			}
 		}
 	}
 	pr["IPO"] = pr["PA"] - (pr["H"] + pr["HBP"] + pr["BB"] + pr["SO"] + pr["SH"] + pr["SF"])
@@ -63,7 +75,7 @@ func (p *Player) Probs() map[string]float64 {
 	return p.probs
 }
 
-func (p *Player) Nums() map[string]int {
+func (p *Player) Nums() map[string]int64 {
 	return p.nums
 }
 
