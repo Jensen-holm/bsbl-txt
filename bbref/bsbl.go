@@ -46,7 +46,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 	var ab = nxtHitter
 	var runs = 0
 
-	for {
+	for outs < 3 {
 		r, err := PA(hittingTm.Hitters()[ab], pitcher)
 		if err != nil {
 			return 0, 0, err
@@ -64,9 +64,6 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			ab = 0
 		}
 
-		if outs > 2 {
-			break
-		}
 	}
 	return ab, runs, nil
 }

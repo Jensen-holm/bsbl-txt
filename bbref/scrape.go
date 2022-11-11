@@ -2,19 +2,18 @@ package bbref
 
 import (
 	"github.com/Jensen-holm/SportSimulation/scrape"
-	"net/http"
-)
-
-import (
 	"github.com/PuerkitoBio/goquery"
+	"net/http"
 	"strings"
 	"sync"
 )
 
-var bbPrefix = "https://baseball-reference.com"
+var (
+	bbPrefix = "https://baseball-reference.com"
+	def      = bbPrefix + "/leagues/"
+)
 
 func FindYrBB(year string) (string, error) {
-	var def = "https://baseball-reference.com/leagues/"
 	r, err := http.Get(def)
 	scrape.HandleGetRequest(year, def, r, err)
 
@@ -69,10 +68,8 @@ func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player, error)
 		return nil, nil, err
 	}
 
-	batTbl := doc.Find("table#team_batting")
-	pitTbl := doc.Find("table#team_pitching")
-	p := ParseBBTbl(pitTbl)
-	h := ParseBBTbl(batTbl)
+	p := ParseBBTbl(doc.Find("table#team_pitching"))
+	h := ParseBBTbl(doc.Find("table#team_batting"))
 
 	hitters := make([]*Player, 0)
 	for _, hitter := range h {
@@ -90,7 +87,7 @@ func FindPlayers(teamName string, teamHref string) ([]*Player, []*Player, error)
 func ParseBBTbl(tbl *goquery.Selection) []map[string]string {
 	players := make([]map[string]string, 0)
 	cols := make([]string, 0)
-	tbl.Each(func(i int, tbl *goquery.Selection) {
+	tbl.Each(func(i int, table *goquery.Selection) {
 		tbl.Find("thead").Each(func(j int, thead *goquery.Selection) {
 			thead.Find("tr").Each(func(k int, r *goquery.Selection) {
 				r.Find("th").Each(func(l int, th *goquery.Selection) {
