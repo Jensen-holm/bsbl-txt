@@ -27,11 +27,7 @@ func main() {
 	bbref.GetTeams(ts)
 
 	for _, team := range ts {
-		team.EstimateRotation()
-		team.EstimateLineup()
-		for _, p := range team.Lineup() {
-			fmt.Println(p.Name())
-		}
+		fmt.Println(len(team.Hitters()), len(team.Pitchers()))
 	}
 }
 

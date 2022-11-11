@@ -23,24 +23,28 @@ func NewTeam(name string, yr string) *Team {
 // EstimateLineup -> Sorts players in the team.hitters slice by
 // finding the player at each position that had the most plate appearances
 func (tm *Team) EstimateLineup() {
+
+	sort.Slice(tm.Hitters(), func(i, j int) bool {
+		return tm.Hitters()[i].Nums()["PA"] > tm.Hitters()[j].Nums()["PA"]
+	})
+
 	l := make(map[string]*Player, 0)
 	for _, h := range tm.Hitters() {
-		// if the position already exists in the map
-		if _, ok := l[h.Attrs()["Pos"]]; ok && h.Nums()["PA"] > 0 {
-			// check if the h has a higher prob than the one already in there
-			l[h.Attrs()["Pos"]] = h
-		} else {
-			l[h.Attrs()["Pos"]] = h
+		pos := h.Position()
+		_, isIn := l[pos]
+		if !isIn {
+			l[pos] = h
+		} else if l[pos].Nums()["PA"] < h.Nums()["PA"] && isIn {
+			l[pos] = h
 		}
 	}
-	line := make([]*Player, 0)
-	for _, h := range l {
-		line = append(line, h)
+
+	lineup := make([]*Player, 0)
+	for _, p := range l {
+		lineup = append(lineup, p)
 	}
-	sort.Slice(line, func(i, j int) bool {
-		return line[i].Probs()["PA"] > line[j].Probs()["PA"]
-	})
-	tm.lineup = line[:9]
+	// the slice here may be redundant but not sure
+	tm.lineup = lineup[:9]
 }
 
 // EstimateRotation -> Iterates through each player that is a pitcher
@@ -48,12 +52,7 @@ func (tm *Team) EstimateLineup() {
 // as an estimation of who on the team pitched the most
 func (tm *Team) EstimateRotation() {
 	r := make([]*Player, 0)
-	for _, p := range tm.Pitchers() {
-		if p.Attrs()["Pos"] != "SP" {
-		} else {
-			r = append(r, p)
-		}
-	}
+	// BF may not be the best way to do this
 	sort.Slice(r, func(i, j int) bool {
 		return r[i].Attrs()["BF"] > r[j].Attrs()["BF"]
 	})
