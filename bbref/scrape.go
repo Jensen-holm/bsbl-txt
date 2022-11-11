@@ -1,11 +1,12 @@
 package bbref
 
 import (
-	"github.com/Jensen-holm/SportSimulation/scrape"
-	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/Jensen-holm/SportSimulation/scrape"
+	"github.com/PuerkitoBio/goquery"
 )
 
 var (

@@ -61,7 +61,8 @@ func (p *Player) CalcProbs(n map[string]int64) {
 }
 
 func (p *Player) Increment(stat string, n int) {
-	if _, ok := p.results[stat]; ok {
+	_, isIn := p.results[stat]
+	if isIn {
 		p.results[stat] += n
 	} else {
 		p.results[stat] = n
