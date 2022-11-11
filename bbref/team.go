@@ -51,12 +51,11 @@ func (tm *Team) EstimateLineup() {
 // on the team and sorts them by batters faced, returns the top 5
 // as an estimation of who on the team pitched the most
 func (tm *Team) EstimateRotation() {
-	r := make([]*Player, 0)
 	// BF may not be the best way to do this
-	sort.Slice(r, func(i, j int) bool {
-		return r[i].Attrs()["BF"] > r[j].Attrs()["BF"]
+	sort.Slice(tm.Pitchers(), func(i, j int) bool {
+		return tm.Pitchers()[i].Attrs()["BF"] > tm.Pitchers()[j].Attrs()["BF"]
 	})
-	tm.rotation = r[:5]
+	tm.rotation = tm.Pitchers()[:5]
 }
 
 // may not need some of these

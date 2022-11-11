@@ -32,6 +32,7 @@ func (p *Player) ParseRawData(d map[string]string) {
 		}
 	}
 	p.nums = nums
+	p.attrs = attrs
 }
 
 // CalcProbs -> For some reason right now this is returning a
