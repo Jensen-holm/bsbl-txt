@@ -1,6 +1,6 @@
 package bbref
 
-import random "github.com/Jensen-holm/SportSimulation/random"
+import "github.com/Jensen-holm/SportSimulation/random"
 
 func PA(h *Player, p *Player) (string, error) {
 	hp := h.Probs()
