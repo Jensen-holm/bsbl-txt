@@ -36,21 +36,44 @@ func PA(h *Player, p *Player) (string, error) {
 	return hResult, nil
 }
 
+func HandleBases(baseState *map[string]bool, r string) (int, error) {
+
+	return 0, nil
+}
+
 // HalfInning -> nxtHitter is the index in the lineup for the
 // next hitter in the hitting team lineup
 func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, error) {
 
-	var outs = 0
-	var ab = nxtHitter
-	var runs = 0
+	var (
+		outs      = 0
+		ab        = nxtHitter
+		runScored = 0
+		baseState = map[string]bool{
+			"1B": false,
+			"2B": false,
+			"3B": false,
+		}
+	)
 
 	for outs < 3 {
-		r, err := PA(hittingTm.Hitters()[ab], pitcher)
+
+		hitter := hittingTm.Hitters()[ab]
+
+		r, err := PA(hitter, pitcher)
 		if err != nil {
 			return 0, 0, err
 		}
 
-		hittingTm.Hitters()[ab].Increment(r, 1)
+		runs, err := HandleBases(&baseState, r)
+		if err != nil {
+			return 0, 0, err
+		}
+
+		hitter.Increment("RBI", runs)
+		pitcher.Increment("ER", runs)
+
+		hitter.Increment(r, 1)
 		pitcher.Increment(r, 1)
 
 		if r == "IPO" || r == "SO" {
@@ -63,7 +86,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 		}
 
 	}
-	return ab, runs, nil
+	return ab, runScored, nil
 }
 
 func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int, int, int, int, error) {
@@ -80,14 +103,28 @@ func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int
 
 func Game(home, away *Team) {
 
-	var gameOver = false
-	var innings = 0.0
+	var (
+		gameOver                             = false
+		innings                              = 0.0
+		homeScore, homeAb, awayScore, awayAb = 0, 0, 0, 0
+		hmPitcher                            = home.Pitchers()[0]
+		awPitcher                            = away.Pitchers()[0]
+	)
 
 	for !gameOver {
 
-		innings += .5
+		nxtHm, nxtAw, homeScored, awayScored, err := Inning(home, away, homeAb, awayAb, hmPitcher, awPitcher)
+		if err != nil {
+			panic(err)
+		}
 
-		if innings >= 9.5 {
+		homeAb = nxtHm
+		awayAb = nxtAw
+		homeScore += homeScored
+		awayScore += awayScored
+
+		innings += .5
+		if innings >= 9.5 && homeScore != awayScore {
 			gameOver = true
 		}
 	}

@@ -11,6 +11,7 @@ type Team struct {
 	pitchers []*Player
 	lineup   []*Player
 	rotation []*Player
+	stats    map[string]any
 }
 
 func NewTeam(name string, yr string) *Team {
