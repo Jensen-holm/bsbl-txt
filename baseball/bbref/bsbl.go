@@ -1,8 +1,6 @@
 package bbref
 
-import (
-	"github.com/Jensen-holm/SportSimulation/bsbl"
-)
+import random "github.com/Jensen-holm/SportSimulation/random"
 
 func PA(h *Player, p *Player) (string, error) {
 	hp := h.Probs()
@@ -16,7 +14,7 @@ func PA(h *Player, p *Player) (string, error) {
 		(hp["IPO"] + pp["IPO"]) / float64(2),
 	}
 
-	result, err := bsbl.Choices(outcomes, weights)
+	result, err := random.Choices(outcomes, weights)
 	if err != nil {
 		return "", err
 	}
@@ -31,7 +29,7 @@ func PA(h *Player, p *Player) (string, error) {
 		(hp["3B"] + pp["3B"]) / float64(2),
 		(hp["HR"] + pp["HR"]) / float64(2),
 	}
-	hResult, err := bsbl.Choices(hOutcomes, hWeights)
+	hResult, err := random.Choices(hOutcomes, hWeights)
 	if err != nil {
 		return "", err
 	}

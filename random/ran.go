@@ -1,4 +1,4 @@
-package bsbl
+package random
 
 import (
 	"fmt"
