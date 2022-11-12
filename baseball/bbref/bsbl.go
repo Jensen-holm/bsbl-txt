@@ -1,7 +1,6 @@
 package bbref
 
 import (
-	"fmt"
 	"github.com/Jensen-holm/SportSimulation/bsbl"
 )
 
@@ -11,7 +10,7 @@ func PA(h *Player, p *Player) (string, error) {
 
 	outcomes := []string{"H", "BB", "HBP", "IPO"}
 	weights := []float64{
-		(hp["H"] + pp["H"]) / float64(2), // hit prob
+		(hp["H"] + pp["H"]) / float64(2),
 		(hp["BB"] + pp["BB"]) / float64(2),
 		(hp["HBP"] + pp["HBP"]) / float64(2),
 		(hp["IPO"] + pp["IPO"]) / float64(2),
@@ -53,7 +52,6 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			return 0, 0, err
 		}
 
-		fmt.Println(r)
 		hittingTm.Hitters()[ab].Increment(r, 1)
 		pitcher.Increment(r, 1)
 
@@ -70,11 +68,29 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 	return ab, runs, nil
 }
 
-func Inning(home, away *Team) error {
-
-	for i := 0; i < 2; i++ {
-
+func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int, int, int, int, error) {
+	nxtAbAw, ar, err := HalfInning(awAb, away, hmPitcher)
+	if err != nil {
+		return 0, 0, 0, 0, err
 	}
+	nxtAbHm, hr, err := HalfInning(hmAb, home, awPitcher)
+	if err != nil {
+		return 0, 0, 0, 0, err
+	}
+	return nxtAbHm, nxtAbAw, ar, hr, nil
+}
 
-	return nil
+func Game(home, away *Team) {
+
+	var gameOver = false
+	var innings = 0.0
+
+	for !gameOver {
+
+		innings += .5
+
+		if innings >= 9.5 {
+			gameOver = true
+		}
+	}
 }
