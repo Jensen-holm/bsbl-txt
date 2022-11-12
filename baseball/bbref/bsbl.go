@@ -1,7 +1,6 @@
 package bbref
 
 import (
-	"fmt"
 	"github.com/Jensen-holm/SportSimulation/random"
 )
 
@@ -39,18 +38,6 @@ func PA(h *Player, p *Player) (string, error) {
 	return hResult, nil
 }
 
-func HandleBases(baseState *BaseState, r string) (int, error) {
-	var runs = 0
-
-	if r == "HR" {
-		runs += 1 + baseState.GuysOn()
-		baseState.ClearBases()
-		return runs, nil
-	}
-
-	return 0, fmt.Errorf("issue inside of the handle bases function")
-}
-
 // HalfInning -> nxtHitter is the index in the lineup for the
 // next hitter in the hitting team lineup
 func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, error) {
@@ -71,7 +58,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			return 0, 0, err
 		}
 
-		runs, err := HandleBases(baseState, r)
+		runs, err := baseState.HandleBases(r)
 		if err != nil {
 			return 0, 0, err
 		}

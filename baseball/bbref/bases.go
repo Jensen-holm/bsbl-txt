@@ -1,5 +1,7 @@
 package bbref
 
+import "fmt"
+
 type BaseState struct {
 	first  bool
 	second bool
@@ -37,4 +39,20 @@ func (b *BaseState) GuysOn() int {
 		}
 	}
 	return on
+}
+
+func (b *BaseState) HandleBases(r string) (int, error) {
+	var runs = 0
+
+	if r == "HR" {
+		runs += 1 + b.GuysOn()
+		b.ClearBases()
+		return runs, nil
+	}
+
+	if r == "2B" {
+
+	}
+
+	return 0, fmt.Errorf("issue inside of the handle bases function")
 }
