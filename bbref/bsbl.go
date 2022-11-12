@@ -1,6 +1,7 @@
 package bbref
 
 import (
+	"fmt"
 	"github.com/Jensen-holm/SportSimulation/bsbl"
 )
 
@@ -52,6 +53,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			return 0, 0, err
 		}
 
+		fmt.Println(r)
 		hittingTm.Hitters()[ab].Increment(r, 1)
 		pitcher.Increment(r, 1)
 

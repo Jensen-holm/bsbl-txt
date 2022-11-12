@@ -28,14 +28,13 @@ func Choices(arr []string, weights []float64) (string, error) {
 
 	// sort the weights from smallest to largest
 	sort.Slice(weights, func(i, j int) bool {
-		return weights[i] > weights[j]
+		return weights[i] < weights[j]
 	})
 
 	rNum := float64(rand.Intn(100)) / float64(100)
 
 	for i := 0; i < l; i++ {
 		wt := weights[i]
-		fmt.Println(wt, rNum)
 		if rNum <= wt {
 			return arr[i], nil
 		}

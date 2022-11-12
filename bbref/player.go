@@ -1,6 +1,7 @@
 package bbref
 
 import (
+	"math"
 	"strconv"
 	"strings"
 )
@@ -17,6 +18,7 @@ func NewPlayer(d map[string]string) *Player {
 	np := Player{raw: d}
 	np.ParseRawData(d)
 	np.CalcProbs(np.Nums())
+	np.results = make(map[string]int, 0)
 	return &np
 }
 
@@ -56,7 +58,7 @@ func (p *Player) CalcProbs(n map[string]int64) {
 			}
 		}
 	}
-	pr["IPO"] = pr["PA"] - (pr["H"] + pr["HBP"] + pr["BB"] + pr["SO"] + pr["SH"] + pr["SF"])
+	pr["IPO"] = math.Abs(pr["PA"] - (pr["H"] + pr["HBP"] + pr["BB"] + pr["SO"] + pr["SH"] + pr["SF"]))
 	p.probs = pr
 }
 
