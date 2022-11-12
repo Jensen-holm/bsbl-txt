@@ -31,11 +31,11 @@ func Choices(arr []string, weights []float64) (string, error) {
 		return weights[i] < weights[j]
 	})
 
-	rNum := float64(rand.Intn(100)) / float64(100)
+	rNum := rand.Intn(100)
 
 	for i := 0; i < l; i++ {
 		wt := weights[i]
-		if rNum <= wt {
+		if float64(rNum) <= (wt * 100) {
 			return arr[i], nil
 		}
 	}
