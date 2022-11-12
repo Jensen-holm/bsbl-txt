@@ -1,6 +1,9 @@
 package bbref
 
-import "github.com/Jensen-holm/SportSimulation/random"
+import (
+	"fmt"
+	"github.com/Jensen-holm/SportSimulation/random"
+)
 
 func PA(h *Player, p *Player) (string, error) {
 	hp := h.Probs()
@@ -36,9 +39,16 @@ func PA(h *Player, p *Player) (string, error) {
 	return hResult, nil
 }
 
-func HandleBases(baseState *map[string]bool, r string) (int, error) {
+func HandleBases(baseState *BaseState, r string) (int, error) {
+	var runs = 0
 
-	return 0, nil
+	if r == "HR" {
+		runs += 1 + baseState.GuysOn()
+		baseState.ClearBases()
+		return runs, nil
+	}
+
+	return 0, fmt.Errorf("issue inside of the handle bases function")
 }
 
 // HalfInning -> nxtHitter is the index in the lineup for the
@@ -47,13 +57,9 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 
 	var (
 		outs      = 0
-		ab        = nxtHitter
 		runScored = 0
-		baseState = map[string]bool{
-			"1B": false,
-			"2B": false,
-			"3B": false,
-		}
+		ab        = nxtHitter
+		baseState = NewBaseState()
 	)
 
 	for outs < 3 {
@@ -65,7 +71,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			return 0, 0, err
 		}
 
-		runs, err := HandleBases(&baseState, r)
+		runs, err := HandleBases(baseState, r)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -101,11 +107,11 @@ func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int
 	return nxtAbHm, nxtAbAw, ar, hr, nil
 }
 
-func Game(home, away *Team) {
+func Game(home, away *Team) error {
 
 	var (
 		gameOver                             = false
-		innings                              = 0.0
+		inning                               = 1.0
 		homeScore, homeAb, awayScore, awayAb = 0, 0, 0, 0
 		hmPitcher                            = home.Pitchers()[0]
 		awPitcher                            = away.Pitchers()[0]
@@ -115,17 +121,18 @@ func Game(home, away *Team) {
 
 		nxtHm, nxtAw, homeScored, awayScored, err := Inning(home, away, homeAb, awayAb, hmPitcher, awPitcher)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		homeAb = nxtHm
 		awayAb = nxtAw
 		homeScore += homeScored
 		awayScore += awayScored
+		inning += .5
 
-		innings += .5
-		if innings >= 9.5 && homeScore != awayScore {
+		if inning >= 9.5 && homeScore != awayScore {
 			gameOver = true
 		}
 	}
+	return nil
 }
