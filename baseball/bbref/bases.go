@@ -41,6 +41,10 @@ func (b *BaseState) GuysOn() int {
 	return on
 }
 
+func (b *BaseState) AdvanceOnHit(r string) {
+
+}
+
 func (b *BaseState) HandleBases(r string) (int, error) {
 	var runs = 0
 

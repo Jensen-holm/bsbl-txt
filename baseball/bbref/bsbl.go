@@ -94,14 +94,14 @@ func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int
 	return nxtAbHm, nxtAbAw, ar, hr, nil
 }
 
-func Game(home, away *Team) error {
+func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error {
+
+	// start inning by default should be 1
 
 	var (
 		gameOver                             = false
-		inning                               = 1.0
-		homeScore, homeAb, awayScore, awayAb = 0, 0, 0, 0
-		hmPitcher                            = home.Pitchers()[0]
-		awPitcher                            = away.Pitchers()[0]
+		inning                               = strtInn
+		homeScore, awayScore, homeAb, awayAb = 0, 0, 0, 0
 	)
 
 	for !gameOver {
@@ -119,6 +119,13 @@ func Game(home, away *Team) error {
 
 		if inning >= 9.5 && homeScore != awayScore {
 			gameOver = true
+		} else if inning > 9.5 && homeScore == awayScore {
+			// want bullpen logic in the future
+			err = Game(home, away, hmPitcher, awPitcher, inning)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
 	}
 	return nil
