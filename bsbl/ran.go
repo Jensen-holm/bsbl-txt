@@ -3,6 +3,7 @@ package bsbl
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -25,17 +26,20 @@ func Choices(arr []string, weights []float64) (string, error) {
 		return "", fmt.Errorf("in the choices function the length of the outcome and weight slices must be equal")
 	}
 
+	// sort the weights from smallest to largest
+	sort.Slice(weights, func(i, j int) bool {
+		return weights[i] > weights[j]
+	})
+
 	rNum := float64(rand.Intn(100)) / float64(100)
 
-	var max int
 	for i := 0; i < l; i++ {
 		wt := weights[i]
+		fmt.Println(wt, rNum)
 		if rNum <= wt {
 			return arr[i], nil
 		}
-		if weights[i] >= weights[max] {
-			max = i
-		}
 	}
-	return arr[max], nil
+	// returns most probable if the random num wasn't smaller than any of the probabilities
+	return arr[len(arr)-1], nil
 }

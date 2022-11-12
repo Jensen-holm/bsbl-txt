@@ -29,18 +29,17 @@ func main() {
 	for _, tm := range ts {
 		tm.EstimateRotation()
 		tm.EstimateLineup()
-
 		// the estimate lineup situation when trying to consider
 		// position is tricky
 		// but I think we want users to set lineups
 		// or we scrape the lineups before each game anyway
 		// link - > https://www.lineups.com/mlb/lineups
-		for _, p := range tm.Lineup() {
-			fmt.Println(p.Name(), p.Position())
-		}
-		fmt.Println("\n")
 	}
 
+	_, _, err := bbref.HalfInning(0, ts[0], ts[1].Pitchers()[0])
+	if err != nil {
+		panic(err)
+	}
 }
 
 func CLInput() string {
