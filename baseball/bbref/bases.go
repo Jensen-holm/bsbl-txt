@@ -88,5 +88,18 @@ func (b *BaseState) HandleBases(r string) (int, error) {
 		return runs, nil
 	}
 
+	if r == "BB" || r == "HBP" {
+		if b.GuysOn() == 3 {
+			return 1, nil
+		}
+
+		// this is not correct and I know ...
+		if b.GuysOn() > 0 {
+			runs := b.AdvanceOnHit("1B")
+			return runs, nil
+		}
+
+	}
+
 	return 0, nil
 }

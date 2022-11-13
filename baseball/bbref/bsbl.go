@@ -1,6 +1,7 @@
 package bbref
 
 import (
+	"fmt"
 	"github.com/Jensen-holm/SportSimulation/random"
 )
 
@@ -57,6 +58,8 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 		if err != nil {
 			return 0, 0, err
 		}
+
+		fmt.Println(r, outs)
 
 		hitter.Increment(r, 1)
 		pitcher.Increment(r, 1)
@@ -117,18 +120,12 @@ func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error
 
 		if inning >= 9.5 && homeScore != awayScore {
 			gameOver = true
+			fmt.Println("Game Is over.")
 			if homeScore > awayScore {
 				home.w += 1
 			} else {
 				away.w += 1
 			}
-		} else if inning > 9.5 && homeScore == awayScore {
-			// want bullpen logic in the future
-			err = Game(home, away, hmPitcher, awPitcher, inning)
-			if err != nil {
-				return err
-			}
-			return nil
 		}
 	}
 	return nil
