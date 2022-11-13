@@ -36,11 +36,17 @@ func main() {
 		// link - > https://www.lineups.com/mlb/lineups
 	}
 
-	_, _, err := bbref.HalfInning(0, ts[0], ts[1].Pitchers()[0])
-	if err != nil {
-		panic(err)
+	for i := 0; i < 16200; i++ {
+		err := bbref.Game(ts[0], ts[1], ts[1].Pitchers()[0], ts[0].Pitchers()[0], 1)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(ts[0].Wins(), ts[1].Wins())
 	}
+
 }
+
+// make a simulation func
 
 func CLInput() string {
 	fmt.Println("Enter Team: ")

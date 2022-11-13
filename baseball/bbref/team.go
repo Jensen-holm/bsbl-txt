@@ -12,6 +12,7 @@ type Team struct {
 	lineup   []*Player
 	rotation []*Player
 	stats    map[string]any
+	w        int
 }
 
 func NewTeam(name string, yr string) *Team {
@@ -82,6 +83,10 @@ func (tm *Team) Year() string {
 
 func (tm *Team) Name() string {
 	return tm.name
+}
+
+func (tm *Team) Wins() int {
+	return tm.w
 }
 
 func (tm *Team) Hitters() []*Player {

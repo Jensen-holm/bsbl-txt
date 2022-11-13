@@ -1,33 +1,35 @@
 package bbref
 
-import "fmt"
-
 type BaseState struct {
-	first  bool
-	second bool
-	third  bool
-	m      map[string]bool
+	m map[string]bool
+	s []bool
 }
 
 func NewBaseState() *BaseState {
 	return &BaseState{
-		false,
-		false,
-		false,
 		map[string]bool{
 			"1B": false,
 			"2B": false,
 			"3B": false,
 		},
+		[]bool{
+			false,
+			false,
+			false,
+		},
 	}
 }
 
 func (b *BaseState) ClearBases() {
-	b.first, b.second, b.third = false, false, false
 	b.m = map[string]bool{
-		"1B": b.first,
-		"2B": b.second,
-		"3B": b.third,
+		"1B": false,
+		"2B": false,
+		"3B": false,
+	}
+	b.s = []bool{
+		false,
+		false,
+		false,
 	}
 }
 
@@ -41,22 +43,50 @@ func (b *BaseState) GuysOn() int {
 	return on
 }
 
-func (b *BaseState) AdvanceOnHit(r string) {
-
+func (b *BaseState) AdvanceOnHit(r string) int {
+	var runs = 0
+	for i, base := range b.s {
+		if base && r == "1B" {
+			newIndex := i + 1
+			if newIndex > len(b.s) {
+				runs += 1
+				b.s[i] = false
+				b.s[0] = true
+			} else {
+				b.s[newIndex] = true
+				b.s[0] = true
+			}
+		} else if base && r == "2B" {
+			newIndex := i + 2
+			if newIndex > len(b.s) {
+				runs += 1
+				b.s[i] = false
+				b.s[1] = true
+			} else {
+				b.s[newIndex] = true
+				b.s[1] = true
+			}
+		} else if base && r == "3B" {
+			runs += b.GuysOn()
+			b.ClearBases()
+			b.s[2] = true
+		}
+	}
+	return runs
 }
 
 func (b *BaseState) HandleBases(r string) (int, error) {
-	var runs = 0
+
+	if r == "2B" || r == "3B" || r == "1B" {
+		runs := b.AdvanceOnHit(r)
+		return runs, nil
+	}
 
 	if r == "HR" {
-		runs += 1 + b.GuysOn()
+		runs := 1 + b.GuysOn()
 		b.ClearBases()
 		return runs, nil
 	}
 
-	if r == "2B" {
-
-	}
-
-	return 0, fmt.Errorf("issue inside of the handle bases function")
+	return 0, nil
 }

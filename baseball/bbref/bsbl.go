@@ -58,19 +58,18 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			return 0, 0, err
 		}
 
-		runs, err := baseState.HandleBases(r)
-		if err != nil {
-			return 0, 0, err
-		}
-
-		hitter.Increment("RBI", runs)
-		pitcher.Increment("ER", runs)
-
 		hitter.Increment(r, 1)
 		pitcher.Increment(r, 1)
 
 		if r == "IPO" || r == "SO" {
 			outs += 1
+		} else {
+			runs, err := baseState.HandleBases(r)
+			if err != nil {
+				return 0, 0, err
+			}
+			hitter.Increment("RBI", runs)
+			pitcher.Increment("ER", runs)
 		}
 
 		ab += 1
@@ -94,9 +93,8 @@ func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int
 	return nxtAbHm, nxtAbAw, ar, hr, nil
 }
 
+// Game -> strtInn by default should be 1 when starting a new game
 func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error {
-
-	// start inning by default should be 1
 
 	var (
 		gameOver                             = false
@@ -119,6 +117,11 @@ func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error
 
 		if inning >= 9.5 && homeScore != awayScore {
 			gameOver = true
+			if homeScore > awayScore {
+				home.w += 1
+			} else {
+				away.w += 1
+			}
 		} else if inning > 9.5 && homeScore == awayScore {
 			// want bullpen logic in the future
 			err = Game(home, away, hmPitcher, awPitcher, inning)
