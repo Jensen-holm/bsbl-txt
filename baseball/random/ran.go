@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
-	"time"
 )
 
 // Creating some functions not specific to baseball
@@ -12,14 +11,10 @@ import (
 // probabilities monte carlo simulation no matter which
 // metrics we decide to build the simulation around
 
-// need to revisit this function
-// b/c I do not think that it is actually fair
-
 // Choices -> Chooses an element from a slice of strings based on weighted
 // requires that the length of the two input parameters are equal
 func Choices(arr []string, weights []float64) (string, error) {
 
-	rand.Seed(time.Now().UnixNano())
 	l := len(arr)
 
 	if l != len(weights) {
@@ -30,6 +25,8 @@ func Choices(arr []string, weights []float64) (string, error) {
 	sort.Slice(weights, func(i, j int) bool {
 		return weights[i] < weights[j]
 	})
+
+	fmt.Println(weights, arr)
 
 	rNum := rand.Intn(100)
 

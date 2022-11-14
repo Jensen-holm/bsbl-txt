@@ -1,7 +1,6 @@
 package bbref
 
 import (
-	"fmt"
 	"github.com/Jensen-holm/SportSimulation/random"
 )
 
@@ -52,14 +51,12 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 
 	for outs < 3 {
 
-		hitter := hittingTm.Hitters()[ab]
+		hitter := hittingTm.Lineup()[ab]
 
 		r, err := PA(hitter, pitcher)
 		if err != nil {
 			return 0, 0, err
 		}
-
-		fmt.Println(r, outs)
 
 		hitter.Increment(r, 1)
 		pitcher.Increment(r, 1)
@@ -68,6 +65,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			outs += 1
 		} else {
 			runs, err := baseState.HandleBases(r)
+			runScored += runScored
 			if err != nil {
 				return 0, 0, err
 			}
@@ -76,7 +74,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 		}
 
 		ab += 1
-		if ab >= len(hittingTm.Hitters()) {
+		if ab >= len(hittingTm.Lineup()) {
 			ab = 0
 		}
 
@@ -120,7 +118,6 @@ func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error
 
 		if inning >= 9.5 && homeScore != awayScore {
 			gameOver = true
-			fmt.Println("Game Is over.")
 			if homeScore > awayScore {
 				home.w += 1
 			} else {

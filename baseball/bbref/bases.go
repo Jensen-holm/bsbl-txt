@@ -100,6 +100,5 @@ func (b *BaseState) HandleBases(r string) (int, error) {
 		}
 
 	}
-
 	return 0, nil
 }

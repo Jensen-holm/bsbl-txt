@@ -37,7 +37,7 @@ func main() {
 	}
 
 	for i := 0; i < 16200; i++ {
-		err := bbref.Game(ts[0], ts[1], ts[1].Pitchers()[0], ts[0].Pitchers()[0], 1)
+		err := bbref.Game(ts[0], ts[1], ts[1].Rotation()[0], ts[0].Rotation()[0], 1)
 		if err != nil {
 			panic(err)
 		}
