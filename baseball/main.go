@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/Jensen-holm/SportSimulation/bbref"
+	"github.com/Jensen-holm/SportSimulation/savant"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"log"
 	"os"
 	"strings"
 )
@@ -24,25 +26,31 @@ func main() {
 		ts = append(ts, bbref.NewTeam(name, yr))
 	}
 
-	bbref.GetTeams(ts)
-
-	for _, tm := range ts {
-		tm.EstimateRotation()
-		tm.EstimateLineup()
-		// the estimate lineup situation when trying to consider
-		// position is tricky
-		// but I think we want users to set lineups
-		// or we scrape the lineups before each game anyway
-		// link - > https://www.lineups.com/mlb/lineups
+	m, err := savant.TmIdMap()
+	if err != nil {
+		log.Fatalf("Error getting the team ids from the reds page")
 	}
+	fmt.Println(m)
 
-	for i := 0; i < 16200; i++ {
-		err := bbref.Game(ts[0], ts[1], ts[1].Rotation()[0], ts[0].Rotation()[0], 1)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(ts[0].Wins(), ts[1].Wins())
-	}
+	//bbref.GetTeams(ts)
+	//
+	//for _, tm := range ts {
+	//	tm.EstimateRotation()
+	//	tm.EstimateLineup()
+	//	// the estimate lineup situation when trying to consider
+	//	// position is tricky
+	//	// but I think we want users to set lineups
+	//	// or we scrape the lineups before each game anyway
+	//	// link - > https://www.lineups.com/mlb/lineups
+	//}
+	//
+	//for i := 0; i < 16200; i++ {
+	//	err := bbref.Game(ts[0], ts[1], ts[1].Rotation()[0], ts[0].Rotation()[0], 1)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	fmt.Println(ts[0].Wins(), ts[1].Wins())
+	//}
 
 }
 

@@ -26,8 +26,6 @@ func Choices(arr []string, weights []float64) (string, error) {
 		return weights[i] < weights[j]
 	})
 
-	fmt.Println(weights, arr)
-
 	rNum := rand.Intn(100)
 
 	for i := 0; i < l; i++ {
