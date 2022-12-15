@@ -14,14 +14,9 @@ format for the input currently is YYYY Team Name, not case sensitive.
 ### Get Started
 
 1. `git clone https://github.com/Jensen-holm/bsbl-txt` <br>
-<br>
 2. `cd bsbl-txt` <br>
-<br>
 3. `go build main.go` <br>
-<br>
 4. `./main`<br> 
-<br>
 5. `1927 new york yankees`
-<br>
 6. `1976 cincinnati reds`
 
