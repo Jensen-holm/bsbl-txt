@@ -15,23 +15,30 @@ import (
 
 func main() {
 
-	teams, err := GetTeams()
+	teams, err := GetTeams("Enter Team name -> ")
 	if err != nil {
 		log.Fatalf("error getting team input: %v", err)
-	}
-
-	_, err = NumSims()
-	if err != nil {
-		log.Fatalf("error getting number of simulations: %v", err)
 	}
 
 	bbref.GetTeams(teams)
 	TeamSetUp(teams)
 
+	sims, err := NumSims("Enter number of simulations -> ")
+	if err != nil {
+		log.Fatalf("error getting number of simulations: %v", err)
+	}
+
+	_, err = bbref.Simulation(sims, teams, ProgressBar)
+	if err != nil {
+		log.Fatalf("error in bbref simulation function -> %v", err)
+	}
+
 }
 
 // CLInput -> prompts for and scans user input
 // for baseball teams to simulate against each other
+// kind of not cool that we ignore an error in this
+// but shouldn't run into it
 func CLInput(prompt string) string {
 	fmt.Println("\n" + prompt)
 	reader := bufio.NewReader(os.Stdin)
@@ -45,12 +52,12 @@ func CLInput(prompt string) string {
 // GetTeams -> Takes raw user input from CLI and creates
 // a baseball reference team object out of it. need to add
 // a check to see if they are real teams
-func GetTeams() ([]*bbref.Team, error) {
+func GetTeams(prompt string) ([]*bbref.Team, error) {
 	var c = cases.Title(language.AmericanEnglish)
 
 	tms := make([]*bbref.Team, 0)
 	for i := 0; i < 2; i++ {
-		t := strings.Split(CLInput("Enter Team -> "), " ")
+		t := strings.Split(CLInput(prompt), " ")
 		name := c.String(strings.Join(t[1:], " "))
 		yr := t[0]
 		tms = append(tms, bbref.NewTeam(name, yr))
@@ -60,8 +67,8 @@ func GetTeams() ([]*bbref.Team, error) {
 
 // NumSims -> Sole responsibility is getting the number of
 // simulations to perform from the user
-func NumSims() (int64, error) {
-	num := CLInput("Numer of simulations -> ")
+func NumSims(prompt string) (int64, error) {
+	num := CLInput(prompt)
 	if n, err := strconv.ParseInt(num, 0, 64); err != nil {
 		return 0, fmt.Errorf("could not convert '%s' into an integer: %v", num, err)
 	} else {
@@ -76,4 +83,17 @@ func TeamSetUp(tms []*bbref.Team) {
 		tm.EstimateRotation()
 		tm.EstimateLineup()
 	}
+}
+
+func ProgressBar(iteration, numIterations int) {
+	pct := (iteration + 1) * 100 / numIterations
+
+	fmt.Printf("\r[")
+	for j := 0; j < pct; j += 5 {
+		fmt.Print("=")
+	}
+	for j := pct; j < 100; j += 5 {
+		fmt.Print(" ")
+	}
+	fmt.Printf("] %d%%", pct)
 }

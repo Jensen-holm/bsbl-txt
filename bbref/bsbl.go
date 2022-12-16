@@ -69,6 +69,7 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 			if err != nil {
 				return 0, 0, err
 			}
+
 			hitter.Increment("RBI", runs)
 			pitcher.Increment("ER", runs)
 		}
@@ -87,25 +88,33 @@ func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
+
 	nxtAbHm, hr, err := HalfInning(hmAb, home, awPitcher)
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
+
 	return nxtAbHm, nxtAbAw, ar, hr, nil
 }
 
-// Game -> strtInn by default should be 1 when starting a new game
-func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error {
+// Game -> inning parameter is the inning in which to start the game
+func Game(home, away *Team, hmPitcher, awPitcher *Player, inning float64) error {
 
 	var (
 		gameOver                             = false
-		inning                               = strtInn
 		homeScore, awayScore, homeAb, awayAb = 0, 0, 0, 0
 	)
 
 	for !gameOver {
+		nxtHm, nxtAw, homeScored, awayScored, err := Inning(
+			home,
+			away,
+			homeAb,
+			awayAb,
+			hmPitcher,
+			awPitcher,
+		)
 
-		nxtHm, nxtAw, homeScored, awayScored, err := Inning(home, away, homeAb, awayAb, hmPitcher, awPitcher)
 		if err != nil {
 			return err
 		}
@@ -126,4 +135,34 @@ func Game(home, away *Team, awPitcher, hmPitcher *Player, strtInn float64) error
 		}
 	}
 	return nil
+}
+
+func Simulation(
+	numSims int64,
+	teams []*Team,
+	progressBar func(iteration, numIters int)) ([]*Team, error) {
+
+	var (
+		team1 = teams[0]
+		team2 = teams[1]
+	)
+
+	for i := 0; i < int(numSims); i++ {
+		progressBar(i, int(numSims))
+
+		err := Game(
+			team1,
+			team2,
+			team1.Rotation()[0],
+			team2.Rotation()[0],
+			1,
+		)
+
+		if err != nil {
+			panic(err)
+		}
+
+	}
+
+	return nil, nil
 }
