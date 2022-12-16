@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/Jensen-holm/SportSimulation/bbref"
+	"github.com/fatih/color"
 	"log"
 	"os"
 	"strconv"
@@ -42,7 +43,7 @@ func main() {
 // kind of not cool that we ignore an error in this
 // but shouldn't run into it
 func CLInput(prompt string) string {
-	fmt.Println("\n" + prompt)
+	color.Cyan("\n" + prompt)
 	reader := bufio.NewReader(os.Stdin)
 	input, err := reader.ReadString('\n')
 	if err != nil {
@@ -72,7 +73,9 @@ func GetTeams(prompt string) ([]*bbref.Team, error) {
 func NumSims(prompt string) (int64, error) {
 	num := CLInput(prompt)
 	if n, err := strconv.ParseInt(num, 0, 64); err != nil {
-		return 0, fmt.Errorf("could not convert '%s' into an integer: %v", num, err)
+		return 0, fmt.Errorf(
+			"could not convert '%s' into an integer: %v", num, err,
+		)
 	} else {
 		return n, nil
 	}

@@ -2,6 +2,7 @@ package bbref
 
 import (
 	"github.com/Jensen-holm/SportSimulation/random"
+	"github.com/fatih/color"
 	"github.com/schollz/progressbar/v3"
 )
 
@@ -41,7 +42,11 @@ func PA(h *Player, p *Player) (string, error) {
 
 // HalfInning -> nxtHitter is the index in the lineup for the
 // next hitter in the hitting team lineup
-func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, error) {
+func HalfInning(
+	nxtHitter int,
+	hittingTm *Team,
+	pitcher *Player,
+) (int, int, error) {
 
 	var (
 		outs      = 0
@@ -106,7 +111,13 @@ func Inning(
 }
 
 // Game -> inning parameter is the inning in which to start the game
-func Game(home, away *Team, hmPitcher, awPitcher *Player, inning float64) error {
+func Game(
+	home,
+	away *Team,
+	hmPitcher,
+	awPitcher *Player,
+	inning float64,
+) error {
 
 	var homeScore, awayScore, homeAb, awayAb = 0, 0, 0, 0
 
@@ -154,6 +165,8 @@ func Simulation(
 		team1 = teams[0]
 		team2 = teams[1]
 	)
+
+	color.Red("\nSimulating %v bsbl games\n\n", numSims)
 
 	bar := progressbar.Default(
 		numSims,
