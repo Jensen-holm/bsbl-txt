@@ -71,7 +71,7 @@ func HalfInning(
 			outs += 1
 		} else {
 			runs, err := baseState.Handle(hitter, r)
-			runScored += runScored
+			runScored += runs
 			if err != nil {
 				return 0, 0, err
 			}
