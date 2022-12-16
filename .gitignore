@@ -4,4 +4,4 @@ go.sum
 
 .idea/
 
-./main
+main
