@@ -1,6 +1,7 @@
 package bbref
 
 import (
+	"fmt"
 	"github.com/Jensen-holm/SportSimulation/random"
 )
 
@@ -83,7 +84,14 @@ func HalfInning(nxtHitter int, hittingTm *Team, pitcher *Player) (int, int, erro
 	return ab, runScored, nil
 }
 
-func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int, int, int, int, error) {
+func Inning(
+	home,
+	away *Team,
+	hmAb,
+	awAb int,
+	hmPitcher,
+	awPitcher *Player) (int, int, int, int, error) {
+
 	nxtAbAw, ar, err := HalfInning(awAb, away, hmPitcher)
 	if err != nil {
 		return 0, 0, 0, 0, err
@@ -100,12 +108,9 @@ func Inning(home, away *Team, hmAb, awAb int, hmPitcher, awPitcher *Player) (int
 // Game -> inning parameter is the inning in which to start the game
 func Game(home, away *Team, hmPitcher, awPitcher *Player, inning float64) error {
 
-	var (
-		gameOver                             = false
-		homeScore, awayScore, homeAb, awayAb = 0, 0, 0, 0
-	)
+	var homeScore, awayScore, homeAb, awayAb = 0, 0, 0, 0
 
-	for !gameOver {
+	for {
 		nxtHm, nxtAw, homeScored, awayScored, err := Inning(
 			home,
 			away,
@@ -123,16 +128,19 @@ func Game(home, away *Team, hmPitcher, awPitcher *Player, inning float64) error 
 		awayAb = nxtAw
 		homeScore += homeScored
 		awayScore += awayScored
-		inning += .5
+		inning += 1
 
-		if inning >= 9.5 && homeScore != awayScore {
-			gameOver = true
-			if homeScore > awayScore {
-				home.w += 1
-			} else {
-				away.w += 1
+		if inning >= 9.5 {
+			if homeScore != awayScore {
+				break
 			}
 		}
+	}
+
+	if homeScore > awayScore {
+		home.w += 1
+	} else {
+		away.w += 1
 	}
 	return nil
 }
@@ -146,6 +154,8 @@ func Simulation(
 		team1 = teams[0]
 		team2 = teams[1]
 	)
+
+	fmt.Printf("\n\n\033[31mSimulating %v bsbl games\033[0m\n", numSims)
 
 	for i := 0; i < int(numSims); i++ {
 		progressBar(i, int(numSims))
@@ -164,5 +174,5 @@ func Simulation(
 
 	}
 
-	return nil, nil
+	return teams, nil
 }
