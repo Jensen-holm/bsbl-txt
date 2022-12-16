@@ -1,104 +1,98 @@
 package bbref
 
 type BaseState struct {
-	m map[string]bool
-	s []bool
+	arr [3]*Player
 }
 
 func NewBaseState() *BaseState {
 	return &BaseState{
-		map[string]bool{
-			"1B": false,
-			"2B": false,
-			"3B": false,
-		},
-		[]bool{
-			false,
-			false,
-			false,
+		arr: [3]*Player{
+			nil, nil, nil,
 		},
 	}
 }
 
-func (b *BaseState) ClearBases() {
-	b.m = map[string]bool{
-		"1B": false,
-		"2B": false,
-		"3B": false,
+func (b *BaseState) Empty() bool {
+	if on := b.GuysOn(); on == 0 {
+		return true
 	}
-	b.s = []bool{
-		false,
-		false,
-		false,
-	}
+	return false
 }
 
 func (b *BaseState) GuysOn() int {
 	var on = 0
-	for _, st := range b.m {
-		if st {
+	for _, base := range b.arr {
+		if base != nil {
 			on += 1
 		}
 	}
 	return on
 }
 
-func (b *BaseState) AdvanceOnHit(r string) int {
-	var runs = 0
-	for i, base := range b.s {
-		if base && r == "1B" {
-			newIndex := i + 1
-			if newIndex > len(b.s) {
-				runs += 1
-				b.s[i] = false
-				b.s[0] = true
-			} else {
-				b.s[newIndex] = true
-				b.s[0] = true
-			}
-		} else if base && r == "2B" {
-			newIndex := i + 2
-			if newIndex > len(b.s) {
-				runs += 1
-				b.s[i] = false
-				b.s[1] = true
-			} else {
-				b.s[newIndex] = true
-				b.s[1] = true
-			}
-		} else if base && r == "3B" {
-			runs += b.GuysOn()
-			b.ClearBases()
-			b.s[2] = true
+func (b *BaseState) GuyOn(i int) bool {
+	if on := b.arr[i]; on != nil {
+		return true
+	}
+	return false
+}
+
+func (b *BaseState) Clear() {
+	b.arr = [3]*Player{
+		nil, nil, nil,
+	}
+}
+
+func (b *BaseState) Move(numBases int) int {
+	if b.Empty() {
+		return 0
+	}
+
+	var runs int
+
+	for i := 3; i != 1; i-- {
+		if !b.GuyOn(i - 1) {
+			continue
+		}
+
+		if i+numBases < 3 {
+			b.arr[i-1+numBases] = b.arr[i-1]
+			b.arr[i-1] = nil
+		} else {
+			b.arr[i] = nil
+			runs += 1
 		}
 	}
 	return runs
 }
 
-func (b *BaseState) HandleBases(r string) (int, error) {
+// Handle -> responsible for calculating runs scored
+// on a given result from a plate appearance and also modifying
+// the base state in place (moving the runners)
+func (b *BaseState) Handle(hitter *Player, result string) (int, error) {
 
-	if r == "2B" || r == "3B" || r == "1B" {
-		runs := b.AdvanceOnHit(r)
-		return runs, nil
-	}
-
-	if r == "HR" {
-		runs := 1 + b.GuysOn()
-		b.ClearBases()
-		return runs, nil
-	}
-
-	if r == "BB" || r == "HBP" {
-		if b.GuysOn() == 3 {
-			return 1, nil
+	var (
+		runs = 0
+		nums = map[string]int{
+			"1B":  1,
+			"2B":  2,
+			"3B":  3,
+			"HR":  3,
+			"BB":  1,
+			"HBP": 1,
 		}
+	)
 
-		// this is not correct and I know ...
-		if b.GuysOn() > 0 {
-			runs := b.AdvanceOnHit("1B")
-			return runs, nil
-		}
-
+	if _, isIn := nums[result]; !isIn {
+		return 0, nil
 	}
-	return 0, nil
+
+	numBases := nums[result]
+	if result == "HR" {
+		b.Clear()
+		return b.Move(numBases) + 1, nil
+	}
+
+	runs += b.Move(numBases)
+	b.arr[numBases] = hitter
+	return runs, nil
 }

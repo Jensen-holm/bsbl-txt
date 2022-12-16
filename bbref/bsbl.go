@@ -70,7 +70,7 @@ func HalfInning(
 		if r == "IPO" || r == "SO" {
 			outs += 1
 		} else {
-			runs, err := baseState.HandleBases(r)
+			runs, err := baseState.Handle(hitter, r)
 			runScored += runScored
 			if err != nil {
 				return 0, 0, err
@@ -110,7 +110,6 @@ func Inning(
 	return nxtAbHm, nxtAbAw, ar, hr, nil
 }
 
-// Game -> inning parameter is the inning in which to start the game
 func Game(
 	home,
 	away *Team,
@@ -141,7 +140,7 @@ func Game(
 		awayScore += awayScored
 		inning += 1
 
-		if inning >= 9.5 {
+		if inning > 9 {
 			if homeScore != awayScore {
 				break
 			}
@@ -162,8 +161,10 @@ func Simulation(
 ) ([]*Team, error) {
 
 	var (
-		team1 = teams[0]
-		team2 = teams[1]
+		team1    = teams[0]
+		team2    = teams[1]
+		pitcher1 = team1.Rotation()[0]
+		pitcher2 = team2.Rotation()[0]
 	)
 
 	color.Red("\nSimulating %v bsbl games\n\n", numSims)
@@ -178,8 +179,8 @@ func Simulation(
 		err := Game(
 			team1,
 			team2,
-			team1.Rotation()[0],
-			team2.Rotation()[0],
+			pitcher1,
+			pitcher2,
 			1,
 		)
 

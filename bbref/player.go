@@ -44,13 +44,13 @@ func (p *Player) CalcProbs(n map[string]int64) {
 	isPit := strings.Contains(p.Position(), "P")
 
 	for stat, val := range n {
-		if stat == "H" || stat == "BB" || stat == "HBP" || stat == "SO" || stat == "SH" || stat == "SF" {
+		if _, isIn := paStats[stat]; isIn {
 			if isPit {
 				pr[stat] = float64(val) / float64(n["BF"])
 			} else {
 				pr[stat] = float64(val) / float64(n["PA"])
 			}
-		} else if stat == "1B" || stat == "2B" || stat == "3B" || stat == "HR" {
+		} else if _, isIn = rStats[stat]; isIn {
 			if isPit {
 				pr[stat] = float64(val) / float64(n["BF"])
 			} else {
@@ -58,7 +58,9 @@ func (p *Player) CalcProbs(n map[string]int64) {
 			}
 		}
 	}
-	pr["IPO"] = math.Abs(pr["PA"] - (pr["H"] + pr["HBP"] + pr["BB"] + pr["SO"] + pr["SH"] + pr["SF"]))
+	pr["IPO"] = math.Abs(
+		pr["PA"] - (pr["H"] + pr["HBP"] + pr["BB"] + pr["SO"] + pr["SH"] + pr["SF"]),
+	)
 	p.probs = pr
 }
 
