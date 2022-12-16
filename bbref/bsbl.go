@@ -1,8 +1,8 @@
 package bbref
 
 import (
-	"fmt"
 	"github.com/Jensen-holm/SportSimulation/random"
+	"github.com/schollz/progressbar/v3"
 )
 
 func PA(h *Player, p *Player) (string, error) {
@@ -148,17 +148,19 @@ func Game(home, away *Team, hmPitcher, awPitcher *Player, inning float64) error 
 func Simulation(
 	numSims int64,
 	teams []*Team,
-	progressBar func(iteration, numIters int)) ([]*Team, error) {
+) ([]*Team, error) {
 
 	var (
 		team1 = teams[0]
 		team2 = teams[1]
 	)
 
-	fmt.Printf("\n\n\033[31mSimulating %v bsbl games\033[0m\n", numSims)
+	bar := progressbar.Default(
+		numSims,
+	)
 
 	for i := 0; i < int(numSims); i++ {
-		progressBar(i, int(numSims))
+		_ = bar.Add(1)
 
 		err := Game(
 			team1,

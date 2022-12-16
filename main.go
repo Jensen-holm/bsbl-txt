@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf("error getting number of simulations: %v", err)
 	}
 
-	teams, err = bbref.Simulation(sims, teams, ProgressBar)
+	teams, err = bbref.Simulation(sims, teams)
 	if err != nil {
 		log.Fatalf("error in bbref simulation function -> %v", err)
 	}
@@ -85,18 +85,4 @@ func TeamSetUp(tms []*bbref.Team) {
 		tm.EstimateRotation()
 		tm.EstimateLineup()
 	}
-}
-
-func ProgressBar(iteration, numIterations int) {
-	pct := (iteration + 1) * 100 / numIterations
-
-	fmt.Println("")
-	fmt.Printf("\r[")
-	for j := 0; j < pct; j += 5 {
-		fmt.Print("=")
-	}
-	for j := pct; j < 100; j += 5 {
-		fmt.Print(" ")
-	}
-	fmt.Printf("] %d%%", pct)
 }

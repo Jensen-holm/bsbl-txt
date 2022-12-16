@@ -1,6 +1,7 @@
 package bbref
 
 import (
+	"github.com/schollz/progressbar/v3"
 	"net/http"
 	"strings"
 	"sync"
@@ -113,12 +114,18 @@ func ParseBBTbl(tbl *goquery.Selection) []map[string]string {
 // GetTeams -> Concurrently calls the functions above to scrape baseball reference
 func GetTeams(teams []*Team) {
 
+	bar := progressbar.Default(
+		int64(len(teams)),
+		"Scraping Team Data ...",
+	)
+
 	var wg = sync.WaitGroup{}
 	// need to make sure that we need a results channel
 	// to have each routine check to make sure that we don't
 	// do the same iteration more than once
 	for _, team := range teams {
 		wg.Add(1)
+		_ = bar.Add(1)
 		go func(wg *sync.WaitGroup, tm *Team) {
 			defer wg.Done()
 
