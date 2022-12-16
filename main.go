@@ -34,7 +34,14 @@ func main() {
 		log.Fatalf("error in bbref simulation function -> %v", err)
 	}
 
-	fmt.Printf("%s -> %v wins", teams[1].Name(), teams[1].Wins())
+	for _, team := range teams {
+		color.Yellow(
+			"\n%s %s win percentage: %v\n",
+			team.Year(),
+			team.Name(),
+			float64(team.Wins())/float64(sims),
+		)
+	}
 
 }
 
