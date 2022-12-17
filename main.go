@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-	teams, err := GetTeams("Enter Team name -> ")
+	teams, err := Teams("Enter Team name -> ")
 	if err != nil {
 		log.Fatalf("error getting team input: %v", err)
 	}
@@ -34,14 +34,7 @@ func main() {
 		log.Fatalf("error in bbref simulation function -> %v", err)
 	}
 
-	for _, team := range teams {
-		color.Yellow(
-			"\n%s %s win percentage: %v\n",
-			team.Year(),
-			team.Name(),
-			float64(team.Wins())/float64(sims),
-		)
-	}
+	Results(teams, sims)
 
 }
 
@@ -59,10 +52,10 @@ func CLInput(prompt string) string {
 	return strings.Replace(input, "\n", "", 1)
 }
 
-// GetTeams -> Takes raw user input from CLI and creates
+// Teams -> Takes raw user input from CLI and creates
 // a baseball reference team object out of it. need to add
 // a check to see if they are real teams
-func GetTeams(prompt string) ([]*bbref.Team, error) {
+func Teams(prompt string) ([]*bbref.Team, error) {
 	var c = cases.Title(language.AmericanEnglish)
 
 	tms := make([]*bbref.Team, 0)
@@ -95,4 +88,16 @@ func TeamSetUp(tms []*bbref.Team) {
 		tm.EstimateRotation()
 		tm.EstimateLineup()
 	}
+}
+
+func Results(teams []*bbref.Team, sims int64) {
+	for _, team := range teams {
+		color.Green(
+			"\n%s %s win percentage: %.2f\n",
+			team.Year(),
+			team.Name(),
+			float64(team.Wins())/float64(sims)*100,
+		)
+	}
+	fmt.Println("\n")
 }
