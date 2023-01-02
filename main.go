@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"github.com/Jensen-holm/SportSimulation/bbref"
 	"github.com/fatih/color"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 func main() {
@@ -99,5 +98,4 @@ func Results(teams []*bbref.Team, sims int64) {
 			float64(team.Wins())/float64(sims)*100,
 		)
 	}
-	fmt.Println("\n")
 }
