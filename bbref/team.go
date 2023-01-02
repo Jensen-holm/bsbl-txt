@@ -2,23 +2,25 @@ package bbref
 
 import (
 	"sort"
+	"strings"
 )
 
 type Team struct {
-	name     string
-	year     string
-	hitters  []*Player
-	pitchers []*Player
-	lineup   []*Player
-	rotation []*Player
-	stats    map[string]any
-	w        int
+	Name     string
+	Year     string
+	Hitters  []*Player
+	Pitchers []*Player
+	Lineup   []*Player
+	Rotation []*Player
+	Stats    map[string]any
+	W        int
 }
 
-func NewTeam(name string, yr string) *Team {
+func NewTeam(input string) *Team {
+	spl := strings.Split(input, " ")
 	return &Team{
-		name: name,
-		year: yr,
+		Name: strings.Title(strings.Join(spl[1:], " ")),
+		Year: spl[0],
 	}
 }
 
@@ -26,14 +28,14 @@ func NewTeam(name string, yr string) *Team {
 // finding the player at each position that had the most plate appearances
 func (tm *Team) EstimateLineup() {
 
-	hits := tm.Hitters()
+	hits := tm.Hitters
 
 	sort.Slice(hits, func(i, j int) bool {
 		return hits[i].Nums()["PA"] > hits[j].Nums()["PA"]
 	})
 
 	l := make(map[string]*Player, 0)
-	for _, h := range tm.Hitters() {
+	for _, h := range tm.Hitters {
 		pos := h.Position()
 		_, isIn := l[pos]
 		if !isIn {
@@ -48,59 +50,31 @@ func (tm *Team) EstimateLineup() {
 		lineup = append(lineup, p)
 	}
 	// the slice here may be redundant but not sure
-	tm.lineup = lineup[:9]
+	tm.Lineup = lineup[:9]
 }
 
 // EstimateRotation -> Iterates through each player that is a pitcher
 // on the team and sorts them by batters faced, returns the top 5
 // as an estimation of who on the team pitched the most
 func (tm *Team) EstimateRotation() {
-	sort.Slice(tm.Pitchers(), func(i, j int) bool {
-		return tm.Pitchers()[i].Attrs()["BF"] > tm.Pitchers()[j].Attrs()["BF"]
+	sort.Slice(tm.Pitchers, func(i, j int) bool {
+		return tm.Pitchers[i].Attrs()["BF"] > tm.Pitchers[j].Attrs()["BF"]
 	})
-	tm.rotation = tm.Pitchers()[:5]
+	tm.Rotation = tm.Pitchers[:5]
 }
 
 func (tm *Team) SetName(n string) {
-	tm.name = n
+	tm.Name = n
 }
 
 func (tm *Team) SetYear(yr string) {
-	tm.year = yr
+	tm.Year = yr
 }
 
 func (tm *Team) SetHitters(hitters []*Player) {
-	tm.hitters = hitters
+	tm.Hitters = hitters
 }
 
 func (tm *Team) SetPitchers(pitchers []*Player) {
-	tm.pitchers = pitchers
-}
-
-func (tm *Team) Year() string {
-	return tm.year
-}
-
-func (tm *Team) Name() string {
-	return tm.name
-}
-
-func (tm *Team) Wins() int {
-	return tm.w
-}
-
-func (tm *Team) Hitters() []*Player {
-	return tm.hitters
-}
-
-func (tm *Team) Pitchers() []*Player {
-	return tm.pitchers
-}
-
-func (tm *Team) Lineup() []*Player {
-	return tm.lineup
-}
-
-func (tm *Team) Rotation() []*Player {
-	return tm.rotation
+	tm.Pitchers = pitchers
 }

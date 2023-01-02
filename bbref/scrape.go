@@ -122,17 +122,17 @@ func GetTeams(teams []*Team) {
 		go func(wg *sync.WaitGroup, tm *Team) {
 			defer wg.Done()
 
-			yearLink, err := FindYrBB(tm.Year())
+			yearLink, err := FindYrBB(tm.Year)
 			if err != nil {
 				panic(err)
 			}
 
-			teamLink, err := FindTeamBB(yearLink, tm.Name())
+			teamLink, err := FindTeamBB(yearLink, tm.Name)
 			if err != nil {
 				panic(err)
 			}
 
-			ps, hs, err := FindPlayers(tm.Name(), teamLink)
+			ps, hs, err := FindPlayers(tm.Name, teamLink)
 			if err != nil {
 				panic(err)
 			}

@@ -1,83 +1,70 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"github.com/Jensen-holm/SportSimulation/bbref"
-	"github.com/fatih/color"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+	"github.com/marcusolsson/tui-go"
 	"log"
-	"os"
 	"strconv"
-	"strings"
 )
 
 func main() {
 
-	teams, err := Teams("Enter Team name -> ")
+	team1 := tui.NewEntry()
+	team2 := tui.NewEntry()
+	numSims := tui.NewEntry()
+
+	form := tui.NewGrid(0, 0)
+	form.AppendRow(
+		tui.NewLabel("Team 1"),
+		tui.NewLabel("Team 2"),
+		tui.NewLabel("Num Sims"),
+	)
+	form.AppendRow(team1, team2, numSims)
+
+	status := tui.NewStatusBar("Ready.")
+
+	init := tui.NewButton("[Go]")
+	init.OnActivated(func(b *tui.Button) {
+		GoButton(team1, team2, numSims, status)
+	})
+
+	buttons := tui.NewHBox(
+		tui.NewSpacer(),
+		tui.NewPadder(1, 0, init),
+	)
+
+	window := tui.NewVBox(
+		tui.NewPadder(12, 0, tui.NewLabel("Welcome to bsbl.txt! Enter teams and number of simulations to get started")),
+		tui.NewPadder(1, 1, form),
+		buttons,
+	)
+	window.SetBorder(true)
+
+	wrapper := tui.NewVBox(
+		tui.NewSpacer(),
+		window,
+		tui.NewSpacer(),
+	)
+	content := tui.NewHBox(tui.NewSpacer(), wrapper, tui.NewSpacer())
+
+	root := tui.NewVBox(
+		content,
+		status,
+	)
+
+	tui.DefaultFocusChain.Set(team1, team2, numSims, init)
+
+	ui, err := tui.New(root)
 	if err != nil {
-		log.Fatalf("error getting team input: %v", err)
+		log.Fatal(err)
 	}
 
-	bbref.GetTeams(teams)
-	TeamSetUp(teams)
+	ui.SetKeybinding("Esc", func() { ui.Quit() })
 
-	sims, err := NumSims("Enter number of simulations -> ")
-	if err != nil {
-		log.Fatalf("error getting number of simulations: %v", err)
+	if err = ui.Run(); err != nil {
+		log.Fatal(err)
 	}
 
-	teams, err = bbref.Simulation(sims, teams)
-	if err != nil {
-		log.Fatalf("error in bbref simulation function -> %v", err)
-	}
-
-	Results(teams, sims)
-
-}
-
-// CLInput -> prompts for and scans user input
-// for baseball teams to simulate against each other
-// kind of not cool that we ignore an error in this
-// but shouldn't run into it
-func CLInput(prompt string) string {
-	color.Cyan("\n" + prompt)
-	reader := bufio.NewReader(os.Stdin)
-	input, err := reader.ReadString('\n')
-	if err != nil {
-		return ""
-	}
-	return strings.Replace(input, "\n", "", 1)
-}
-
-// Teams -> Takes raw user input from CLI and creates
-// a baseball reference team object out of it. need to add
-// a check to see if they are real teams
-func Teams(prompt string) ([]*bbref.Team, error) {
-	var c = cases.Title(language.AmericanEnglish)
-
-	tms := make([]*bbref.Team, 0)
-	for i := 0; i < 2; i++ {
-		t := strings.Split(CLInput(prompt), " ")
-		name := c.String(strings.Join(t[1:], " "))
-		yr := t[0]
-		tms = append(tms, bbref.NewTeam(name, yr))
-	}
-	return tms, nil
-}
-
-// NumSims -> Sole responsibility is getting the number of
-// simulations to perform from the user
-func NumSims(prompt string) (int64, error) {
-	num := CLInput(prompt)
-	if n, err := strconv.ParseInt(num, 0, 64); err != nil {
-		return 0, fmt.Errorf(
-			"could not convert '%s' into an integer: %v", num, err,
-		)
-	} else {
-		return n, nil
-	}
 }
 
 // TeamSetUp -> Runs functions necessary to set the
@@ -89,13 +76,29 @@ func TeamSetUp(tms []*bbref.Team) {
 	}
 }
 
-func Results(teams []*bbref.Team, sims int64) {
-	for _, team := range teams {
-		color.Green(
-			"\n%s %s win percentage: %.2f\n",
-			team.Year(),
-			team.Name(),
-			float64(team.Wins())/float64(sims)*100,
-		)
+// GoButton -> Runs when the Go button is pressed and
+// valid teams are entered as input
+func GoButton(team1, team2, sims *tui.Entry, status *tui.StatusBar) {
+
+	status.SetText("Simulating ...")
+	nSims, _ := strconv.ParseInt(sims.Text(), 0, 64)
+
+	// create teams
+	status.SetText("Scraping team data ...")
+	tms := []*bbref.Team{
+		bbref.NewTeam(team1.Text()),
+		bbref.NewTeam(team2.Text()),
 	}
+
+	// collect team data
+	bbref.GetTeams(tms)
+
+	// start simulation with the teams
+	TeamSetUp(tms)
+	tms, err := bbref.Simulation(nSims, tms)
+	if err != nil {
+		log.Fatalf("error in the simulation: %v", err)
+	}
+
+	status.SetText("Done!")
 }

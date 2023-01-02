@@ -57,7 +57,7 @@ func HalfInning(
 
 	for outs < 3 {
 
-		hitter := hittingTm.Lineup()[ab]
+		hitter := hittingTm.Lineup[ab]
 
 		r, err := PA(hitter, pitcher)
 		if err != nil {
@@ -81,7 +81,7 @@ func HalfInning(
 		}
 
 		ab += 1
-		if ab >= len(hittingTm.Lineup()) {
+		if ab >= len(hittingTm.Lineup) {
 			ab = 0
 		}
 
@@ -148,9 +148,9 @@ func Game(
 	}
 
 	if homeScore > awayScore {
-		home.w += 1
+		home.W += 1
 	} else {
-		away.w += 1
+		away.W += 1
 	}
 	return nil
 }
@@ -163,8 +163,8 @@ func Simulation(
 	var (
 		team1    = teams[0]
 		team2    = teams[1]
-		pitcher1 = team1.Rotation()[0]
-		pitcher2 = team2.Rotation()[0]
+		pitcher1 = team1.Rotation[0]
+		pitcher2 = team2.Rotation[0]
 	)
 
 	color.Red("\nSimulating %v bsbl games\n\n", numSims)
