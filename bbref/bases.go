@@ -65,22 +65,22 @@ func (b *BaseState) Move(numBases int) int {
 	return runs
 }
 
+var (
+	runs = 0
+	nums = map[string]int{
+		"1B":  1,
+		"2B":  2,
+		"3B":  3,
+		"HR":  3,
+		"BB":  1,
+		"HBP": 1,
+	}
+)
+
 // Handle -> responsible for calculating runs scored
 // on a given result from a plate appearance and also modifying
 // the base state in place (moving the runners)
 func (b *BaseState) Handle(hitter *Player, result string) (int, error) {
-
-	var (
-		runs = 0
-		nums = map[string]int{
-			"1B":  1,
-			"2B":  2,
-			"3B":  3,
-			"HR":  3,
-			"BB":  1,
-			"HBP": 1,
-		}
-	)
 
 	if _, isIn := nums[result]; !isIn {
 		return 0, nil
